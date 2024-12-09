@@ -1,6 +1,6 @@
 package fr.twiloo.iut.gtes.common;
 
-public record Request(
-    Action action,
-    Object payload) {
+public record Request<P>(
+    ClientAction action,
+    P payload) {
 }

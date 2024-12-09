@@ -7,13 +7,13 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-public final class ConnectedClient implements Runnable {
-    private final CallableService service;
+public final class ConnectedClient<P> implements Runnable {
+    private final CallableService<P> service;
     private final Socket socket;
     private final ObjectOutputStream out;
     private ObjectInputStream in;
 
-    public ConnectedClient(CallableService service, Socket socket) throws IOException {
+    public ConnectedClient(CallableService<P> service, Socket socket) throws IOException {
         this.service = service;
         this.socket = socket;
         this.out = new ObjectOutputStream(socket.getOutputStream());
@@ -35,7 +35,9 @@ public final class ConnectedClient implements Runnable {
                 throw new RuntimeException(e);
             }
 
-            if (!(request instanceof Request)) {
+            @SuppressWarnings("unchecked")
+            boolean correctRequest = (request instanceof Request<?> && ((Request<P>) request).payload() != null);
+            if (!correctRequest) {
                 try {
                     service.disconnectClient(this);
                 } catch (IOException e) {
@@ -45,7 +47,8 @@ public final class ConnectedClient implements Runnable {
             }
 
             try {
-                Object response = service.run((Request) request);
+                @SuppressWarnings("unchecked") // request payload should always be of type P
+                Object response = service.run((Request<P>) request);
                 if (response != null)
                     out.writeObject(response);
             } catch (Exception e) {

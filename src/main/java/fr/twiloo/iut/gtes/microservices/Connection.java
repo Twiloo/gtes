@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class Connection implements Runnable {
-    private final CallableService callableService;
+public final class Connection<P> implements Runnable {
+    private final CallableService<P> callableService;
     private final ServerSocket serverSocket;
 
-    public Connection(CallableService callableService) throws IOException {
+    public Connection(CallableService<P> callableService) throws IOException {
         this.callableService = callableService;
         this.serverSocket = new ServerSocket(callableService.getPort());
     }
@@ -23,9 +23,9 @@ public class Connection implements Runnable {
                 throw new RuntimeException(e);
             }
 
-            ConnectedClient newClient;
+            ConnectedClient<P> newClient;
             try {
-                newClient = new ConnectedClient(callableService, socketNewClient);
+                newClient = new ConnectedClient<>(callableService, socketNewClient);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

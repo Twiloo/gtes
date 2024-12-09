@@ -1,17 +1,19 @@
 package fr.twiloo.iut.gtes.microservices;
 
 import fr.twiloo.iut.gtes.common.Request;
+import fr.twiloo.iut.gtes.common.ServiceConfig;
+import fr.twiloo.iut.gtes.common.dto.request.team.TeamRequest;
 
 import java.io.IOException;
 
-public class TeamService extends CallableService {
+public final class TeamService extends CallableService<TeamRequest> {
 
     public TeamService() throws IOException {
-        super(1234);
+        super(ServiceConfig.TEAM.port);
     }
 
     @Override
-    Object run(Request request) throws Exception {
+    public Object run(Request<TeamRequest> request) throws Exception {
         return switch (request.action()) {
             case EQUIPE_MODIFIEE -> updateTeam(request.payload());
             case EQUIPE_SUPPRIMEE -> deleteTeam(request.payload());
