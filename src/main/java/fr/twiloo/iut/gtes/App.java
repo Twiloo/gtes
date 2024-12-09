@@ -1,4 +1,4 @@
-package fr.twiloo.iut;
+package fr.twiloo.iut.gtes;
 
 public class App {
     public static void main( String[] args ) {
