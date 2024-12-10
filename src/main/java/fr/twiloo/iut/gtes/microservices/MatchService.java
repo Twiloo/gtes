@@ -41,14 +41,14 @@ public class MatchService extends CallableService {
 
     @Override
     Object run(Request request) throws Exception {
-        return switch (request.action()) {
+        return switch (request.getAction()) {
             case MATCH_ORGANISE -> {
-                Team[] teams = (Team[]) request.payload();
+                Team[] teams = (Team[]) request.getPayload();
                 organizeMatch(teams[0], teams[1]);
                 yield "Match organized between " + teams[0].name() + " and " + teams[1].name();
             }
             case MATCH_TERMINE -> {
-                int[] scores = (int[]) request.payload();
+                int[] scores = (int[]) request.getPayload();
                 finishMatch(scores[0], scores[1]);
                 yield "Match finished with score " + scores[0] + " - " + scores[1];
             }
@@ -56,7 +56,7 @@ public class MatchService extends CallableService {
                 cancelMatch();
                 yield "Match has been cancelled.";
             }
-            default -> throw new Exception("Service is unable to process this action: " + request.action());
+            default -> throw new Exception("Service is unable to process this getAction: " + request.getAction());
         };
     }
 

@@ -18,18 +18,18 @@ public final class TeamService extends CallableService<TeamRequest> {
 
     @Override
     public Object run(Request<TeamRequest> request) throws Exception {
-        return switch (request.action()) {
-            case EQUIPE_MODIFIEE -> updateTeam(request.payload());
-            case EQUIPE_SUPPRIMEE -> deleteTeam(request.payload());
-            case NOUVELLE_EQUIPE_CREE -> createTeam(request.payload());
-            default -> throw new Exception("Service is unable to process this action : " + request.action());
+        return switch (request.getAction()) {
+            case EQUIPE_MODIFIEE -> updateTeam(request.getPayload());
+            case EQUIPE_SUPPRIMEE -> deleteTeam(request.getPayload());
+            case NOUVELLE_EQUIPE_CREE -> createTeam(request.getPayload());
+            default -> throw new Exception("Service is unable to process this getAction : " + request.getAction());
         };
     }
 
     private Object createTeam(Object payload) {
         // Payload est supposé être une Map avec les détails de l'équipe
         if (!(payload instanceof Map<?, ?>)) {
-            return "Invalid payload format for team creation.";
+            return "Invalid getPayload format for team creation.";
         }
 
         Map<?, ?> teamData = (Map<?, ?>) payload;
@@ -51,7 +51,7 @@ public final class TeamService extends CallableService<TeamRequest> {
     private Object updateTeam(Object payload) {
         // Payload est supposé être une Map avec les détails de l'équipe à mettre à jour
         if (!(payload instanceof Map<?, ?>)) {
-            return "Invalid payload format for team update.";
+            return "Invalid getPayload format for team update.";
         }
 
         Map<?, ?> teamData = (Map<?, ?>) payload;
@@ -77,7 +77,7 @@ public final class TeamService extends CallableService<TeamRequest> {
     private Object deleteTeam(Object payload) {
         // Payload est supposé être l'ID de l'équipe à supprimer
         if (!(payload instanceof String)) {
-            return "Invalid payload format for team deletion.";
+            return "Invalid getPayload format for team deletion.";
         }
 
         String teamId = (String) payload;

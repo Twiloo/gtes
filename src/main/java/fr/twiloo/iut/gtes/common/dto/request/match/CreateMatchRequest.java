@@ -1,15 +1,10 @@
 package fr.twiloo.iut.gtes.common.dto.request.match;
 
 import fr.twiloo.iut.gtes.common.Match;
+import fr.twiloo.iut.gtes.common.dto.response.match.CreateMatchResponse;
 
-public class CreateMatchRequest implements MatchRequest {
-    private final Match match;
-
+public final class CreateMatchRequest extends MatchRequest<Match, CreateMatchResponse> {
     public CreateMatchRequest(Match match) {
-        this.match = match;
-    }
-
-    public Match getMatch() {
-        return match;
+        super(match);
     }
 }
