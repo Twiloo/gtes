@@ -42,17 +42,17 @@ public class MatchService extends CallableService {
     @Override
     Object run(Request request) throws Exception {
         return switch (request.getAction()) {
-            case MATCH_ORGANISE -> {
+            case CREATE_MATCH -> {
                 Team[] teams = (Team[]) request.getPayload();
                 organizeMatch(teams[0], teams[1]);
                 yield "Match organized between " + teams[0].name() + " and " + teams[1].name();
             }
-            case MATCH_TERMINE -> {
+            case END_MATCH -> {
                 int[] scores = (int[]) request.getPayload();
                 finishMatch(scores[0], scores[1]);
                 yield "Match finished with score " + scores[0] + " - " + scores[1];
             }
-            case MATCH_ANNULE -> {
+            case CANCEL_MATCH -> {
                 cancelMatch();
                 yield "Match has been cancelled.";
             }

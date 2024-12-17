@@ -8,13 +8,13 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-public final class ConnectedClient<P, ER extends Response> implements Runnable {
-    private final CallableService<P> service;
+public final class ConnectedClient<R extends Request<?>, ER extends Response<?>> implements Runnable {
+    private final CallableService<R, ER> service;
     private final Socket socket;
     private final ObjectOutputStream out;
     private ObjectInputStream in;
 
-    public ConnectedClient(CallableService<P, ? extends Response> service, Socket socket) throws IOException {
+    public ConnectedClient(CallableService<R, ER> service, Socket socket) throws IOException {
         this.service = service;
         this.socket = socket;
         this.out = new ObjectOutputStream(socket.getOutputStream());
@@ -36,8 +36,7 @@ public final class ConnectedClient<P, ER extends Response> implements Runnable {
                 throw new RuntimeException(e);
             }
 
-            @SuppressWarnings("unchecked")
-            boolean correctRequest = (request instanceof Request<?> && ((Request<P>) request).getPayload() != null) && ((Request<P>) request).getAction() != null;
+            boolean correctRequest = (request instanceof Request<?> && ((Request<?>) request).getPayload() != null) && ((Request<?>) request).getAction() != null;
             if (!correctRequest) {
                 try {
                     service.disconnectClient(this);
@@ -49,7 +48,7 @@ public final class ConnectedClient<P, ER extends Response> implements Runnable {
 
             try {
                 @SuppressWarnings("unchecked") // request getPayload should always be of type P
-                Object response = service.run((Request<P>) request);
+                ER response = service.run((R) request);
                 if (response != null)
                     out.writeObject(response);
             } catch (Exception e) {

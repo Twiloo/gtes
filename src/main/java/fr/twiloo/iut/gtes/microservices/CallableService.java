@@ -8,9 +8,9 @@ import java.util.ArrayList;
 
 import static java.lang.System.out;
 
-abstract public class CallableService<P, ER extends Response> {
+abstract public class CallableService<R extends Request<?>, ER extends Response<?>> {
     protected final int port;
-    protected final ArrayList<ConnectedClient<P, ER>> clients = new ArrayList<>();
+    protected final ArrayList<ConnectedClient<R, ER>> clients = new ArrayList<>();
 
     protected CallableService(int port) throws IOException {
         this.port = port;
@@ -19,14 +19,14 @@ abstract public class CallableService<P, ER extends Response> {
         threadConnection.start();
     }
 
-    abstract Object run(Request<P, ER> request) throws Exception;
+    abstract ER run(R request) throws Exception;
 
-    public void disconnectClient(ConnectedClient<P, ER> client) throws IOException {
+    public void disconnectClient(ConnectedClient<R, ER> client) throws IOException {
         client.closeClient();
         clients.remove(client);
     }
 
-    public void addClient(ConnectedClient<P, ER> client) {
+    public void addClient(ConnectedClient<R, ER> client) {
         clients.add(client);
     }
 

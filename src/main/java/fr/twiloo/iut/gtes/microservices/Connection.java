@@ -1,14 +1,17 @@
 package fr.twiloo.iut.gtes.microservices;
 
+import fr.twiloo.iut.gtes.common.Request;
+import fr.twiloo.iut.gtes.common.Response;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public final class Connection<P> implements Runnable {
-    private final CallableService<P> callableService;
+public final class Connection<R extends Request<?>, ER extends Response<?>> implements Runnable {
+    private final CallableService<R, ER> callableService;
     private final ServerSocket serverSocket;
 
-    public Connection(CallableService<P> callableService) throws IOException {
+    public Connection(CallableService<R, ER> callableService) throws IOException {
         this.callableService = callableService;
         this.serverSocket = new ServerSocket(callableService.getPort());
     }
@@ -23,7 +26,7 @@ public final class Connection<P> implements Runnable {
                 throw new RuntimeException(e);
             }
 
-            ConnectedClient<P> newClient;
+            ConnectedClient<R, ER> newClient;
             try {
                 newClient = new ConnectedClient<>(callableService, socketNewClient);
             } catch (IOException e) {

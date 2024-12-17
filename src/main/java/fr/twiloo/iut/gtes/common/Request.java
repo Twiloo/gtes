@@ -1,7 +1,6 @@
 package fr.twiloo.iut.gtes.common;
 
 /**
- *
  * @param <P> payload type
  */
 public abstract class Request<P> {
@@ -17,9 +16,5 @@ public abstract class Request<P> {
 
     public Action getAction() {
         return Action.actionOf(this);
-    }
-
-    public Class<? extends Response> getExpectedResponseClass() {
-        return this.getAction().getResponseClass();
     }
 }
