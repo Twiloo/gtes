@@ -5,5 +5,6 @@ import java.util.ArrayList;
 public record Team(
         ArrayList<String> players,
         String name,
-        String ranking) {
+        Integer elo,
+        Integer ranking) {
 }

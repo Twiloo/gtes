@@ -1,97 +1,50 @@
 package fr.twiloo.iut.gtes.microservices;
 
 import fr.twiloo.iut.gtes.common.ServiceConfig;
+import fr.twiloo.iut.gtes.common.Team;
 import fr.twiloo.iut.gtes.common.dto.request.team.TeamRequest;
+import fr.twiloo.iut.gtes.common.dto.request.team.UpdateTeamRequest;
+import fr.twiloo.iut.gtes.common.dto.response.team.ListTeamsResponse;
 import fr.twiloo.iut.gtes.common.dto.response.team.TeamResponse;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 public final class TeamService extends CallableService<TeamRequest<?>, TeamResponse<?>> {
-
-    private final Map<String, String> teams = new HashMap<>();
+    private final List<Team> teams = new ArrayList<>();
 
     public TeamService() throws IOException {
-        super(ServiceConfig.TEAM.port);
+        super(ServiceConfig.TEAM);
     }
 
     @Override
-    public TeamResponse<?> run(TeamRequest request) throws Exception {
+    public TeamResponse<?> dispatch(TeamRequest<?> request) throws Exception {
         return switch (request.getAction()) {
-            case UPDATE_TEAM -> updateTeam(request.getPayload());
-            case DELETE_TEAM -> deleteTeam(request.getPayload());
-            case CREATE_TEAM -> createTeam(request.getPayload());
+            case CREATE_TEAM -> createTeam((Team) request.getPayload());
+            case LIST_TEAMS -> listTeams();
+            case UPDATE_TEAM -> updateTeam((UpdateTeamRequest.Payload) request.getPayload());
+            case DELETE_TEAM -> deleteTeam((String) request.getPayload());
             default -> throw new Exception("Service is unable to process this getAction : " + request.getAction());
         };
     }
 
-    private TeamResponse<?> createTeam(TeamRequest payload) {
+    private TeamResponse<?> createTeam(Team payload) {
         return null;
-//        // Payload est supposé être une Map avec les détails de l'équipe
-//        if (!(payload instanceof Map<?, ?>)) {
-//            return "Invalid getPayload format for team creation.";
-//        }
-//
-//        Map<?, ?> teamData = (Map<?, ?>) payload;
-//        String teamId = (String) teamData.get("id");
-//        String teamName = (String) teamData.get("name");
-//
-//        if (teamId == null || teamName == null) {
-//            return "Team ID or Name is missing.";
-//        }
-//
-//        teams.put(teamId, teamName);
-//
-//        // Publier un événement "NouvelleEquipeCree"
-//        System.out.println("Event Published: NouvelleEquipeCree for Team ID " + teamId);
-//
-//        return "Team created successfully: " + teamName;
     }
 
-    private TeamResponse<?> updateTeam(Object payload) {
-        // Payload est supposé être une Map avec les détails de l'équipe à mettre à jour
-        if (!(payload instanceof Map<?, ?>)) {
-            return "Invalid getPayload format for team update.";
-        }
-
-        Map<?, ?> teamData = (Map<?, ?>) payload;
-        String teamId = (String) teamData.get("id");
-        String newTeamName = (String) teamData.get("name");
-
-        if (teamId == null || newTeamName == null) {
-            return "Team ID or new Name is missing.";
-        }
-
-        if (!teams.containsKey(teamId)) {
-            return "Team not found.";
-        }
-
-        teams.put(teamId, newTeamName);
-
-        // Publier un événement "EquipeModifiee"
-        System.out.println("Event Published: EquipeModifiee for Team ID " + teamId);
-
-        return "Team updated successfully: " + newTeamName;
+    private ListTeamsResponse listTeams() {
+        List<Team> orderedTeams = new ArrayList<>(teams);
+        orderedTeams.sort(Comparator.comparing(Team::ranking));
+        return new ListTeamsResponse(orderedTeams);
     }
 
-    private TeamResponse<?> deleteTeam(Object payload) {
-        // Payload est supposé être l'ID de l'équipe à supprimer
-        if (!(payload instanceof String)) {
-            return "Invalid getPayload format for team deletion.";
-        }
+    private TeamResponse<?> updateTeam(UpdateTeamRequest.Payload payload) {
+        return null;
+    }
 
-        String teamId = (String) payload;
-
-        if (!teams.containsKey(teamId)) {
-            return "Team not found.";
-        }
-
-        teams.remove(teamId);
-
-        // Publier un événement "EquipeSupprimee"
-        System.out.println("Event Published: EquipeSupprimee for Team ID " + teamId);
-
-        return "Team deleted successfully.";
+    private TeamResponse<?> deleteTeam(String payload) {
+        return null;
     }
 }

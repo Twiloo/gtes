@@ -8,26 +8,25 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-public final class ConnectedClient<R extends Request<?>, ER extends Response<?>> implements Runnable {
+public final class AskingClient<R extends Request<?>, ER extends Response<?>> implements Runnable {
     private final CallableService<R, ER> service;
     private final Socket socket;
     private final ObjectOutputStream out;
-    private ObjectInputStream in;
+    private final ObjectInputStream in;
 
-    public ConnectedClient(CallableService<R, ER> service, Socket socket) throws IOException {
+    public AskingClient(CallableService<R, ER> service, Socket socket) throws IOException, RuntimeException {
         this.service = service;
         this.socket = socket;
         this.out = new ObjectOutputStream(socket.getOutputStream());
-    }
-
-    @Override
-    public void run() {
         try {
             in = new ObjectInputStream(socket.getInputStream());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
 
+    @Override
+    public void run() {
         while (true) {
             Object request;
             try {
@@ -36,10 +35,12 @@ public final class ConnectedClient<R extends Request<?>, ER extends Response<?>>
                 throw new RuntimeException(e);
             }
 
-            boolean correctRequest = (request instanceof Request<?> && ((Request<?>) request).getPayload() != null) && ((Request<?>) request).getAction() != null;
+            boolean correctRequest = request instanceof Request<?> &&
+                    ((Request<?>) request).getAction() != null &&
+                    request.getClass().equals(service.getClass().getDeclaredClasses()[0]); // request should extend R class
             if (!correctRequest) {
                 try {
-                    service.disconnectClient(this);
+                    service.disconnectAskingClient(this);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -48,7 +49,7 @@ public final class ConnectedClient<R extends Request<?>, ER extends Response<?>>
 
             try {
                 @SuppressWarnings("unchecked") // request getPayload should always be of type P
-                ER response = service.run((R) request);
+                ER response = service.dispatch((R) request);
                 if (response != null)
                     out.writeObject(response);
             } catch (Exception e) {

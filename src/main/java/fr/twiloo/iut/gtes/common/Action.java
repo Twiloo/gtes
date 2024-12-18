@@ -7,25 +7,22 @@ import fr.twiloo.iut.gtes.common.dto.request.team.CreateTeamRequest;
 import fr.twiloo.iut.gtes.common.dto.request.team.DeleteTeamRequest;
 import fr.twiloo.iut.gtes.common.dto.request.team.ListTeamsRequest;
 import fr.twiloo.iut.gtes.common.dto.request.team.UpdateTeamRequest;
-import fr.twiloo.iut.gtes.common.dto.response.match.CreateMatchResponse;
 
 public enum Action {
-    LIST_TEAMS(ListTeamsRequest.class, null),
-    CREATE_TEAM(CreateTeamRequest.class, null),
-    UPDATE_TEAM(UpdateTeamRequest.class, null),
-    DELETE_TEAM(DeleteTeamRequest.class, null),
-    CREATE_MATCH(CreateMatchRequest.class, CreateMatchResponse.class),
-    END_MATCH(EndMatchRequest.class, null),
-    CANCEL_MATCH(CancelMatchRequest.class, null),
-    NOTIFY_NEW_TEAM(null, null),
-    NOTIFY_MATCH_RESULTS(null, null),;
+    LIST_TEAMS(ListTeamsRequest.class),
+    CREATE_TEAM(CreateTeamRequest.class),
+    UPDATE_TEAM(UpdateTeamRequest.class),
+    DELETE_TEAM(DeleteTeamRequest.class),
+    CREATE_MATCH(CreateMatchRequest.class),
+    END_MATCH(EndMatchRequest.class),
+    CANCEL_MATCH(CancelMatchRequest.class),
+    NOTIFY_NEW_TEAM(null),
+    NOTIFY_MATCH_RESULTS(null),;
 
     private final Class<? extends Request<?>> requestClass;
-    private final Class<? extends Response<?>> responseClass;
 
-    Action(Class<? extends Request<?>> requestClass, Class<? extends Response<?>> responseClass) {
+    Action(Class<? extends Request<?>> requestClass) {
         this.requestClass = requestClass;
-        this.responseClass = responseClass;
     }
 
     public static Action actionOf(Request<?> request) {
@@ -35,9 +32,5 @@ public enum Action {
             }
         }
         return null;
-    }
-
-    public Class<? extends Response<?>> getResponseClass() {
-        return responseClass;
     }
 }
