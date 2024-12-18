@@ -11,7 +11,7 @@ import static java.lang.System.out;
 
 abstract public class CallableService<R extends Request<?>, ER extends Response<?>> {
     protected final int requestPort;
-    protected final int notificationPort;
+    protected final Integer notificationPort;
     protected final ArrayList<AskingClient<R, ER>> askingClients = new ArrayList<>();
     protected final ArrayList<ListeningClient<ER>> listeningClients = new ArrayList<>();
 
@@ -23,10 +23,15 @@ abstract public class CallableService<R extends Request<?>, ER extends Response<
         this.notificationPort = config.getSubscriptionPort();
 
         requestConnection = new Connection<>(this, false);
-        notificationConnection = new Connection<>(this, true);
-
         new Thread(requestConnection).start();
-        new Thread(notificationConnection).start();
+
+        if (notificationPort != null) {
+            notificationConnection = new Connection<>(this, true);
+            new Thread(notificationConnection).start();
+        } else {
+            notificationConnection = null;
+        }
+
         out.println(this.getClass().getSimpleName() + " started");
     }
 
@@ -54,7 +59,8 @@ abstract public class CallableService<R extends Request<?>, ER extends Response<
             client.closeClient();
         }
         requestConnection.stop();
-        notificationConnection.stop();
+        if (notificationConnection != null)
+            notificationConnection.stop();
         System.out.println("Service stopped");
     }
 
@@ -67,7 +73,7 @@ abstract public class CallableService<R extends Request<?>, ER extends Response<
         return requestPort;
     }
 
-    public int getNotificationPort() {
+    public Integer getNotificationPort() {
         return notificationPort;
     }
 }

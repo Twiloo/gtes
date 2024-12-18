@@ -4,8 +4,7 @@ import fr.twiloo.iut.gtes.common.ServiceConfig;
 import fr.twiloo.iut.gtes.common.Team;
 import fr.twiloo.iut.gtes.common.dto.request.team.TeamRequest;
 import fr.twiloo.iut.gtes.common.dto.request.team.UpdateTeamRequest;
-import fr.twiloo.iut.gtes.common.dto.response.team.ListTeamsResponse;
-import fr.twiloo.iut.gtes.common.dto.response.team.TeamResponse;
+import fr.twiloo.iut.gtes.common.dto.response.team.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,21 +29,60 @@ public final class TeamService extends CallableService<TeamRequest<?>, TeamRespo
         };
     }
 
-    private TeamResponse<?> createTeam(Team payload) {
-        return null;
+    private CreateTeamResponse createTeam(Team payload) {
+        if (payload == null ||
+                payload.getName() == null || payload.getName().isEmpty() ||
+                payload.getPlayers() == null || payload.getPlayers().size() != 3 ||
+                findTeam(payload.getName()) != null) {
+            return new CreateTeamResponse(new CreateTeamResponse.Content(false, null));
+        }
+        Team team = new Team(payload.getPlayers(), payload.getName(), 500, 0, true);
+        teams.add(team);
+        return new CreateTeamResponse(new CreateTeamResponse.Content(true, team));
     }
 
     private ListTeamsResponse listTeams() {
-        List<Team> orderedTeams = new ArrayList<>(teams);
-        orderedTeams.sort(Comparator.comparing(Team::ranking));
+        List<Team> orderedTeams = teams.stream()
+                .filter(Team::isActive)
+                .sorted(Comparator.comparing(Team::getRanking))
+                .toList();
         return new ListTeamsResponse(orderedTeams);
     }
 
-    private TeamResponse<?> updateTeam(UpdateTeamRequest.Payload payload) {
+    /**
+     * This performs patch like update (null values from the request are kept as the original ones)
+     */
+    private UpdateTeamResponse updateTeam(UpdateTeamRequest.Payload payload) {
+        Team team = null;
+        if (payload != null)
+            team = findTeam(payload.teamName());
+        if (team == null)
+            return new UpdateTeamResponse(new UpdateTeamResponse.Content(false, null));
+
+        Team newTeam = payload.newTeam();
+        if (newTeam.getName() != null && !newTeam.getName().isEmpty() && findTeam(newTeam.getName()) == null)
+            newTeam.setName(team.getName());
+
+        if (newTeam.getPlayers() != null && newTeam.getPlayers().size() == 3)
+            team.setPlayers(newTeam.getPlayers());
+
         return null;
     }
 
-    private TeamResponse<?> deleteTeam(String payload) {
-        return null;
+    /**
+     * This performs soft delete
+     */
+    private DeleteTeamResponse deleteTeam(String payload) {
+        Team team = findTeam(payload);
+        if (team != null)
+            team.deactivate();
+        return new DeleteTeamResponse(team != null);
+    }
+
+    private Team findTeam(String name) {
+        return teams.stream()
+                .filter(team -> team.getName().equals(name))
+                .findFirst()
+                .orElse(null);
     }
 }

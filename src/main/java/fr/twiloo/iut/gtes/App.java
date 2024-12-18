@@ -115,16 +115,16 @@ public final class App {
 //    }
 //
 //    private static void addTeam() {
-//        out.println("Enter team name:");
+//        out.println("Enter team getName:");
 //        String teamName = sc.nextLine();
 //        teamScores.putIfAbsent(teamName, 0);
 //        out.println("Team \"" + teamName + "\" added successfully!");
 //    }
 //
 //    private static void organizeMatch() {
-//        out.println("Enter the name of Team 1:");
+//        out.println("Enter the getName of Team 1:");
 //        String team1 = sc.nextLine();
-//        out.println("Enter the name of Team 2:");
+//        out.println("Enter the getName of Team 2:");
 //        String team2 = sc.nextLine();
 //
 //        if (!teamScores.containsKey(team1) || !teamScores.containsKey(team2)) {

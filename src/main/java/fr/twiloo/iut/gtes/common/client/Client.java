@@ -28,7 +28,7 @@ public final class Client<R extends Request<?>, ER extends Response<?>> implemen
         requestIn = new ObjectInputStream(requestSocket.getInputStream());
         clientSend = new ClientSend<>(requestOut, requestIn);
 
-        // Socket for async notifications comming from service (like a webhook, you subscribe by connecting to said service)
+        // Socket for async notifications coming from service (like a webhook, you subscribe by connecting to said service)
         if (config.getSubscriptionPort() != null) {
             notificationSocket = new Socket(config.getAddress(), config.getSubscriptionPort());
             ObjectInputStream notificationIn = new ObjectInputStream(notificationSocket.getInputStream());

@@ -15,7 +15,7 @@ public class EventBus {
     // Method to publish an event
     public void publish(Event<?, ?> event) {
         System.out.println("Event triggered: " + event.getName());
-        System.out.println("Payload: " + event.getPayload());
+        System.out.println("Content: " + event.getPayload());
 
         for (Consumer<Event<?, ?>> listener : listeners) {
             listener.accept(event);

@@ -91,7 +91,7 @@ public class MatchService extends CallableService {
             case CREATE_MATCH -> {
                 Team[] teams = (Team[]) request.getPayload();
                 organizeMatch(teams[0], teams[1]);
-                yield "Match organized between " + teams[0].name() + " and " + teams[1].name();
+                yield "Match organized between " + teams[0].getName() + " and " + teams[1].getName();
             }
             case END_MATCH -> {
                 int[] scores = (int[]) request.getPayload();
