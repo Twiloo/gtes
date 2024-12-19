@@ -5,6 +5,7 @@ import fr.twiloo.iut.gtes.microservices.service.notification.NotificationService
 import fr.twiloo.iut.gtes.microservices.service.team.TeamService;
 
 public enum ServiceConfig {
+    BUS(4242, 6969, null),
     TEAM(10001, null,  TeamService.class),
     MATCH(10002, null, MatchService.class),
     NOTIFICATION(10003, 50001, NotificationService.class);

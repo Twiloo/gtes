@@ -1,6 +1,6 @@
 package fr.twiloo.iut.gtes.common.client;
 
-import fr.twiloo.iut.gtes.common.Response;
+import fr.twiloo.iut.gtes.common.model.dto.Response;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -8,7 +8,6 @@ import java.io.ObjectInputStream;
 /**
  * @param <R> Response class (here I use it as notification class because I don't want/need to complexify this anymore
  */
-
 public final class ClientReceive<R extends Response<?>> implements Runnable {
     private final ObjectInputStream notificationIn;
 

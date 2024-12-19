@@ -1,7 +1,7 @@
 package fr.twiloo.iut.gtes.common.client;
 
-import fr.twiloo.iut.gtes.common.Request;
-import fr.twiloo.iut.gtes.common.Response;
+import fr.twiloo.iut.gtes.common.model.dto.Request;
+import fr.twiloo.iut.gtes.common.model.dto.Response;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -21,9 +21,7 @@ public final class ClientSend<R extends Request<?>, ER extends Response<?>> {
             out.writeObject(request);
             out.flush();
             Object response = in.readObject();
-            boolean correctResponse = response instanceof Response<?> &&
-                    response.getClass().equals(this.getClass().getDeclaredClasses()[1]);
-            if (correctResponse) {
+            if (response instanceof Response<?>) {
                 try {
                     return (ER) response;
                 } catch (ClassCastException e) {

@@ -46,9 +46,9 @@ public class MatchService {
 /*
 package fr.twiloo.iut.gtes.microservices;
 
-import fr.twiloo.iut.gtes.common.Match;
-import fr.twiloo.iut.gtes.common.Request;
-import fr.twiloo.iut.gtes.common.Team;
+import fr.twiloo.iut.gtes.common.model.Match;
+import fr.twiloo.iut.gtes.common.model.dto.Request;
+import fr.twiloo.iut.gtes.common.model.Team;
 
 import java.io.IOException;
 

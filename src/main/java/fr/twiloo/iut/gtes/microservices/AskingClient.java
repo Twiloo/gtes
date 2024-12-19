@@ -1,7 +1,7 @@
 package fr.twiloo.iut.gtes.microservices;
 
-import fr.twiloo.iut.gtes.common.Request;
-import fr.twiloo.iut.gtes.common.Response;
+import fr.twiloo.iut.gtes.common.model.dto.Request;
+import fr.twiloo.iut.gtes.common.model.dto.Response;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -27,34 +27,67 @@ public final class AskingClient<R extends Request<?>, ER extends Response<?>> im
 
     @Override
     public void run() {
-        while (true) {
-            Object request;
-            try {
-                request = in.readObject();
-            } catch (IOException | ClassNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-
-            boolean correctRequest = request instanceof Request<?> &&
-                    ((Request<?>) request).getAction() != null &&
-                    request.getClass().equals(service.getClass().getDeclaredClasses()[0]); // request should extend R class
-            if (!correctRequest) {
+        try {
+            while (!socket.isClosed()) {
+                Object request;
                 try {
-                    service.disconnectAskingClient(this);
+                    request = in.readObject();
                 } catch (IOException e) {
+                    // Handle client disconnection
+                    System.err.println("Client disconnected : " + e.getMessage());
+                    closeClientSafely();
+                    break;
+                } catch (ClassNotFoundException e) {
+                    System.err.println("Received invalid object: " + e.getMessage());
+                    continue;
+                }
+
+                boolean correctRequest = request instanceof Request<?> &&
+                        ((Request<?>) request).getAction() != null; // request should extend R class
+                if (!correctRequest) {
+                    try {
+                        service.disconnectAskingClient(this);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    break;
+                }
+
+                try {
+                    // request getPayload should always be of type P
+                    ER response = service.dispatch((R) request);
+                    if (response != null)
+                        out.writeObject(response);
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-                break;
             }
+        } finally {
+            closeClientSafely();
+        }
+    }
 
-            try {
-                @SuppressWarnings("unchecked") // request getPayload should always be of type P
-                ER response = service.dispatch((R) request);
-                if (response != null)
-                    out.writeObject(response);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+    private void closeClientSafely() {
+        try {
+            if (!socket.isClosed()) {
+                socket.close();
             }
+        } catch (IOException e) {
+            System.err.println("Error closing socket: " + e.getMessage());
+        }
+        try {
+            if (in != null) {
+                in.close();
+            }
+        } catch (IOException e) {
+            System.err.println("Error closing input stream: " + e.getMessage());
+        }
+        try {
+            if (out != null) {
+                out.close();
+            }
+        } catch (IOException e) {
+            System.err.println("Error closing output stream: " + e.getMessage());
         }
     }
 

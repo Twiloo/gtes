@@ -1,10 +1,10 @@
 package fr.twiloo.iut.gtes.microservices.service.team;
 
 import fr.twiloo.iut.gtes.common.ServiceConfig;
-import fr.twiloo.iut.gtes.common.Team;
-import fr.twiloo.iut.gtes.common.dto.request.team.TeamRequest;
-import fr.twiloo.iut.gtes.common.dto.request.team.UpdateTeamRequest;
-import fr.twiloo.iut.gtes.common.dto.response.team.*;
+import fr.twiloo.iut.gtes.common.model.Team;
+import fr.twiloo.iut.gtes.common.model.dto.request.team.TeamRequest;
+import fr.twiloo.iut.gtes.common.model.dto.request.team.UpdateTeamRequest;
+import fr.twiloo.iut.gtes.common.model.dto.response.team.*;
 import fr.twiloo.iut.gtes.microservices.CallableService;
 
 import java.io.IOException;

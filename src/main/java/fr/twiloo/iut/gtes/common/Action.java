@@ -1,12 +1,13 @@
 package fr.twiloo.iut.gtes.common;
 
-import fr.twiloo.iut.gtes.common.dto.request.match.CancelMatchRequest;
-import fr.twiloo.iut.gtes.common.dto.request.match.CreateMatchRequest;
-import fr.twiloo.iut.gtes.common.dto.request.match.EndMatchRequest;
-import fr.twiloo.iut.gtes.common.dto.request.team.CreateTeamRequest;
-import fr.twiloo.iut.gtes.common.dto.request.team.DeleteTeamRequest;
-import fr.twiloo.iut.gtes.common.dto.request.team.ListTeamsRequest;
-import fr.twiloo.iut.gtes.common.dto.request.team.UpdateTeamRequest;
+import fr.twiloo.iut.gtes.common.model.dto.Request;
+import fr.twiloo.iut.gtes.common.model.dto.request.match.CancelMatchRequest;
+import fr.twiloo.iut.gtes.common.model.dto.request.match.CreateMatchRequest;
+import fr.twiloo.iut.gtes.common.model.dto.request.match.EndMatchRequest;
+import fr.twiloo.iut.gtes.common.model.dto.request.team.CreateTeamRequest;
+import fr.twiloo.iut.gtes.common.model.dto.request.team.DeleteTeamRequest;
+import fr.twiloo.iut.gtes.common.model.dto.request.team.ListTeamsRequest;
+import fr.twiloo.iut.gtes.common.model.dto.request.team.UpdateTeamRequest;
 
 public enum Action {
     LIST_TEAMS(ListTeamsRequest.class),

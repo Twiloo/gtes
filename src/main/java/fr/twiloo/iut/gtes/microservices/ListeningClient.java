@@ -1,6 +1,6 @@
 package fr.twiloo.iut.gtes.microservices;
 
-import fr.twiloo.iut.gtes.common.Response;
+import fr.twiloo.iut.gtes.common.model.dto.Response;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -16,7 +16,10 @@ public final class ListeningClient<R extends Response<?>> {
     }
 
     public void notify(R notification) {
+        if (socket.isClosed())
+            return;
         try {
+
             out.writeObject(notification);
             out.flush();
         } catch (IOException e) {

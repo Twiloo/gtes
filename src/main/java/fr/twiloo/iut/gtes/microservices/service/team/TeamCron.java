@@ -1,6 +1,6 @@
 package fr.twiloo.iut.gtes.microservices.service.team;
 
-import fr.twiloo.iut.gtes.common.Team;
+import fr.twiloo.iut.gtes.common.model.Team;
 
 import java.util.List;
 

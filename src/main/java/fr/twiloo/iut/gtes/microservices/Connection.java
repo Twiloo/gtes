@@ -1,7 +1,7 @@
 package fr.twiloo.iut.gtes.microservices;
 
-import fr.twiloo.iut.gtes.common.Request;
-import fr.twiloo.iut.gtes.common.Response;
+import fr.twiloo.iut.gtes.common.model.dto.Request;
+import fr.twiloo.iut.gtes.common.model.dto.Response;
 
 import java.io.IOException;
 import java.net.ServerSocket;

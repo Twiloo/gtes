@@ -1,7 +1,7 @@
 package fr.twiloo.iut.gtes.common.client;
 
-import fr.twiloo.iut.gtes.common.Request;
-import fr.twiloo.iut.gtes.common.Response;
+import fr.twiloo.iut.gtes.common.model.dto.Request;
+import fr.twiloo.iut.gtes.common.model.dto.Response;
 import fr.twiloo.iut.gtes.common.ServiceConfig;
 
 import java.io.IOException;
