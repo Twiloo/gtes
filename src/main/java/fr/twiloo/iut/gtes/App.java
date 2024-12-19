@@ -1,6 +1,6 @@
 package fr.twiloo.iut.gtes;
 
-import fr.twiloo.iut.gtes.microservices.TeamService;
+import fr.twiloo.iut.gtes.microservices.service.team.TeamService;
 import fr.twiloo.iut.gtes.mvc.MVCApp;
 
 import java.io.IOException;
@@ -62,7 +62,7 @@ public final class App {
     }
 }
 
-//import fr.twiloo.iut.gtes.microservices.MatchService;
+//import fr.twiloo.iut.gtes.microservices.service.match.MatchService;
 //
 //import java.io.IOException;
 //import java.util.HashMap;

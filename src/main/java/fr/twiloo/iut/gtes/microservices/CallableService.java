@@ -35,7 +35,7 @@ abstract public class CallableService<R extends Request<?>, ER extends Response<
         out.println(this.getClass().getSimpleName() + " started");
     }
 
-    abstract ER dispatch(R request) throws Exception;
+    public abstract ER dispatch(R request) throws Exception;
 
     public void addAskingClient(AskingClient<R, ER> client) {
         askingClients.add(client);

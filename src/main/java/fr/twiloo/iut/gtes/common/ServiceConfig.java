@@ -1,8 +1,8 @@
 package fr.twiloo.iut.gtes.common;
 
-import fr.twiloo.iut.gtes.microservices.MatchService;
-import fr.twiloo.iut.gtes.microservices.NotificationService;
-import fr.twiloo.iut.gtes.microservices.TeamService;
+import fr.twiloo.iut.gtes.microservices.service.match.MatchService;
+import fr.twiloo.iut.gtes.microservices.service.notification.NotificationService;
+import fr.twiloo.iut.gtes.microservices.service.team.TeamService;
 
 public enum ServiceConfig {
     TEAM(10001, null,  TeamService.class),

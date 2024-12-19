@@ -1,4 +1,4 @@
-package fr.twiloo.iut.gtes.microservices;
+package fr.twiloo.iut.gtes.microservices.service.match;
 
 import fr.twiloo.iut.gtes.mvc.event.match.MatchFinishedEvent;
 import fr.twiloo.iut.gtes.mvc.event.update.RankingUpdatedEvent;

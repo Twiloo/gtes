@@ -1,10 +1,11 @@
-package fr.twiloo.iut.gtes.microservices;
+package fr.twiloo.iut.gtes.microservices.service.team;
 
 import fr.twiloo.iut.gtes.common.ServiceConfig;
 import fr.twiloo.iut.gtes.common.Team;
 import fr.twiloo.iut.gtes.common.dto.request.team.TeamRequest;
 import fr.twiloo.iut.gtes.common.dto.request.team.UpdateTeamRequest;
 import fr.twiloo.iut.gtes.common.dto.response.team.*;
+import fr.twiloo.iut.gtes.microservices.CallableService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,6 +17,10 @@ public final class TeamService extends CallableService<TeamRequest<?>, TeamRespo
 
     public TeamService() throws IOException {
         super(ServiceConfig.TEAM);
+
+        TeamCron cron = new TeamCron(teams);
+        Thread t = new Thread(cron);
+        t.start();
     }
 
     @Override
@@ -37,16 +42,20 @@ public final class TeamService extends CallableService<TeamRequest<?>, TeamRespo
             return new CreateTeamResponse(new CreateTeamResponse.Content(false, null));
         }
         Team team = new Team(payload.getPlayers(), payload.getName(), 500, 0, true);
-        teams.add(team);
+        synchronized (teams) {
+            teams.add(team);
+        }
         return new CreateTeamResponse(new CreateTeamResponse.Content(true, team));
     }
 
     private ListTeamsResponse listTeams() {
-        List<Team> orderedTeams = teams.stream()
-                .filter(Team::isActive)
-                .sorted(Comparator.comparing(Team::getRanking))
-                .toList();
-        return new ListTeamsResponse(orderedTeams);
+        synchronized (teams) {
+            List<Team> orderedTeams = teams.stream()
+                    .filter(Team::isActive)
+                    .sorted(Comparator.comparing(Team::getRanking))
+                    .toList();
+            return new ListTeamsResponse(orderedTeams);
+        }
     }
 
     /**
@@ -54,19 +63,19 @@ public final class TeamService extends CallableService<TeamRequest<?>, TeamRespo
      */
     private UpdateTeamResponse updateTeam(UpdateTeamRequest.Payload payload) {
         Team team = null;
-        if (payload != null)
+        if (payload != null && payload.newTeam() != null)
             team = findTeam(payload.teamName());
         if (team == null)
             return new UpdateTeamResponse(new UpdateTeamResponse.Content(false, null));
 
         Team newTeam = payload.newTeam();
         if (newTeam.getName() != null && !newTeam.getName().isEmpty() && findTeam(newTeam.getName()) == null)
-            newTeam.setName(team.getName());
+            team.setName(newTeam.getName());
 
         if (newTeam.getPlayers() != null && newTeam.getPlayers().size() == 3)
             team.setPlayers(newTeam.getPlayers());
 
-        return null;
+        return new UpdateTeamResponse(new UpdateTeamResponse.Content(true, team));
     }
 
     /**
@@ -80,9 +89,11 @@ public final class TeamService extends CallableService<TeamRequest<?>, TeamRespo
     }
 
     private Team findTeam(String name) {
-        return teams.stream()
-                .filter(team -> team.getName().equals(name))
-                .findFirst()
-                .orElse(null);
+        synchronized (teams) {
+            return teams.stream()
+                    .filter(team -> team.getName().equals(name))
+                    .findFirst()
+                    .orElse(null);
+        }
     }
 }

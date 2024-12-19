@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 
 /**
- * @param <R> Response class (here I use it as notification class because I don't want/need to complexify this any more
+ * @param <R> Response class (here I use it as notification class because I don't want/need to complexify this anymore
  */
 
 public final class ClientReceive<R extends Response<?>> implements Runnable {
