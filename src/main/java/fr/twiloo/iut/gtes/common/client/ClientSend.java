@@ -1,5 +1,6 @@
 package fr.twiloo.iut.gtes.common.client;
 
+import fr.twiloo.iut.gtes.common.model.Event;
 import fr.twiloo.iut.gtes.common.model.dto.Request;
 import fr.twiloo.iut.gtes.common.model.dto.Response;
 
@@ -7,30 +8,18 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-public final class ClientSend<R extends Request<?>, ER extends Response<?>> {
+public final class ClientSend {
     private final ObjectOutputStream out;
-    private final ObjectInputStream in;
 
-    public ClientSend(ObjectOutputStream out, ObjectInputStream in) {
+    public ClientSend(ObjectOutputStream out) {
         this.out = out;
-        this.in = in;
     }
 
-    public ER sendRequest(R request) {
+    public void sendEvent(Event<?> event) {
         try {
-            out.writeObject(request);
+            out.writeObject(event);
             out.flush();
-            Object response = in.readObject();
-            if (response instanceof Response<?>) {
-                try {
-                    return (ER) response;
-                } catch (ClassCastException e) {
-                    throw new IllegalStateException("Invalid response type received from service.");
-                }
-            } else {
-                throw new IllegalStateException("Invalid response type received from service.");
-            }
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException e) {
             throw new RuntimeException("Failed to send request or read response", e);
         }
     }

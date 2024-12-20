@@ -9,17 +9,17 @@ import java.io.ObjectInputStream;
  * @param <R> Response class (here I use it as notification class because I don't want/need to complexify this anymore
  */
 public final class ClientReceive<R extends Response<?>> implements Runnable {
-    private final ObjectInputStream notificationIn;
+    private final ObjectInputStream in;
 
     public ClientReceive(ObjectInputStream notificationIn) {
-        this.notificationIn = notificationIn;
+        this.in = notificationIn;
     }
 
     @Override
     public void run() {
         try {
             while (true) {
-                Object notification = notificationIn.readObject();
+                Object notification = in.readObject();
                 boolean correctNotification = notification instanceof Response<?> &&
                         notification.getClass().equals(this.getClass().getDeclaredClasses()[0]);
                 if (correctNotification) {

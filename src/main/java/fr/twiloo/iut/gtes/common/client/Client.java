@@ -11,28 +11,26 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 
-public final class Client<R extends Request<?>, ER extends Response<?>> implements Closeable {
+public final class Client implements Closeable {
     private final Socket requestSocket;
     private final Socket notificationSocket;
 
-    private final ObjectInputStream requestIn;
-    private final ObjectOutputStream requestOut;
+    private final ObjectOutputStream eventOut;
 
-    private final ClientSend<R, ER> clientSend;
+    private final ClientSend clientSend;
     private final Thread clientReceiveThread;
 
     public Client(ServiceConfig config) throws IOException {
         // Socket for synchronous requests made by client
         requestSocket = new Socket(config.getAddress(), config.getRequestPort());
-        requestOut = new ObjectOutputStream(requestSocket.getOutputStream());
-        requestIn = new ObjectInputStream(requestSocket.getInputStream());
-        clientSend = new ClientSend<>(requestOut, requestIn);
+        eventOut = new ObjectOutputStream(requestSocket.getOutputStream());
+        clientSend = new ClientSend(eventOut);
 
         // Socket for async notifications coming from service (like a webhook, you subscribe by connecting to said service)
         if (config.getSubscriptionPort() != null) {
             notificationSocket = new Socket(config.getAddress(), config.getSubscriptionPort());
             ObjectInputStream notificationIn = new ObjectInputStream(notificationSocket.getInputStream());
-            clientReceiveThread = new Thread(new ClientReceive<ER>(notificationIn));
+            clientReceiveThread = new Thread(new ClientReceive(notificationIn));
             clientReceiveThread.setDaemon(true);
             clientReceiveThread.start();
         } else {
@@ -41,7 +39,7 @@ public final class Client<R extends Request<?>, ER extends Response<?>> implemen
         }
     }
 
-    public ClientSend<R, ER> getClientSend() {
+    public ClientSend getClientSend() {
         return clientSend;
     }
 
@@ -56,7 +54,7 @@ public final class Client<R extends Request<?>, ER extends Response<?>> implemen
         requestSocket.close();
         if (notificationSocket != null)
             notificationSocket.close();
-        requestIn.close();
-        requestOut.close();
+
+        eventOut.close();
     }
 }
