@@ -1,8 +1,7 @@
 package fr.twiloo.iut.gtes.common.client;
 
-import fr.twiloo.iut.gtes.common.model.dto.Request;
-import fr.twiloo.iut.gtes.common.model.dto.Response;
-import fr.twiloo.iut.gtes.common.ServiceConfig;
+import fr.twiloo.iut.gtes.common.Config;
+import fr.twiloo.iut.gtes.common.model.Event;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -10,37 +9,31 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-
 public final class Client implements Closeable {
-    private final Socket requestSocket;
-    private final Socket notificationSocket;
+    private final Socket socket;
+    private final ObjectOutputStream out;
 
-    private final ObjectOutputStream eventOut;
-
-    private final ClientSend clientSend;
     private final Thread clientReceiveThread;
 
-    public Client(ServiceConfig config) throws IOException {
-        // Socket for synchronous requests made by client
-        requestSocket = new Socket(config.getAddress(), config.getRequestPort());
-        eventOut = new ObjectOutputStream(requestSocket.getOutputStream());
-        clientSend = new ClientSend(eventOut);
+    public Client(Config config, EventDispatcher eventDispatcher) throws IOException {
+        // Socket for synchronous events produced by client
+        socket = new Socket("127.0.0.1", config.port);
+        out = new ObjectOutputStream(socket.getOutputStream());
 
-        // Socket for async notifications coming from service (like a webhook, you subscribe by connecting to said service)
-        if (config.getSubscriptionPort() != null) {
-            notificationSocket = new Socket(config.getAddress(), config.getSubscriptionPort());
-            ObjectInputStream notificationIn = new ObjectInputStream(notificationSocket.getInputStream());
-            clientReceiveThread = new Thread(new ClientReceive(notificationIn));
-            clientReceiveThread.setDaemon(true);
-            clientReceiveThread.start();
-        } else {
-            notificationSocket = null;
-            clientReceiveThread = null;
-        }
+        // Thread for async events coming from event bus (like a webhook, you subscribe by connecting to said events)
+        ClientReceive clientReceive = new ClientReceive(new ObjectInputStream(socket.getInputStream()), eventDispatcher);
+        clientReceiveThread = new Thread(clientReceive);
+        clientReceiveThread.start();
+        System.out.println("Connected to event bus : " + socket.getRemoteSocketAddress() + " on port " + socket.getPort());
     }
 
-    public ClientSend getClientSend() {
-        return clientSend;
+    public void sendEvent(Event<?> event) {
+        try {
+            out.writeObject(event);
+            out.flush();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to send request or read response", e);
+        }
     }
 
     @Override

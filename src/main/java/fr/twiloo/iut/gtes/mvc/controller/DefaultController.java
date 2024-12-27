@@ -1,10 +1,7 @@
 package fr.twiloo.iut.gtes.mvc.controller;
 
 import fr.twiloo.iut.gtes.App;
-import fr.twiloo.iut.gtes.common.client.ClientManager;
 import fr.twiloo.iut.gtes.mvc.view.View;
-
-import java.io.IOException;
 
 import static java.lang.System.out;
 
@@ -62,11 +59,11 @@ public final class DefaultController {
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
-            try {
-                ClientManager.getInstance().closeClients();
-            } catch (IOException ioException) {
-                throw new RuntimeException(ioException);
-            }
+//            try {
+//                ClientManager.getInstance().closeClients();
+//            } catch (IOException ioException) {
+//                throw new RuntimeException(ioException);
+//            }
             Thread.currentThread().interrupt();
         }
     }

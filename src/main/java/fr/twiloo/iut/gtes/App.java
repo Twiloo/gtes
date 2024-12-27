@@ -1,5 +1,7 @@
 package fr.twiloo.iut.gtes;
 
+import fr.twiloo.iut.gtes.common.Config;
+import fr.twiloo.iut.gtes.eventbus.EventBus;
 import fr.twiloo.iut.gtes.microservices.service.team.TeamService;
 import fr.twiloo.iut.gtes.mvc.MVCApp;
 
@@ -18,9 +20,10 @@ public final class App {
                     Quelle application/service démarrer ?
                     
                      1 : MVC ;
-                     2 : Service Equipes ;
-                     3 : Service Matchs ;
-                     4 : Service Notifications.
+                     2 : EventBus ;
+                     3 : Service Equipes ;
+                     4 : Service Matchs ;
+                     5 : Service Notifications.
                     """);
             int option;
             try {
@@ -34,6 +37,18 @@ public final class App {
                     new MVCApp();
                     return;
                 case 2:
+                    EventBus eventBus = new EventBus(Config.EVENT_BUS.port);
+                    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                        out.println("Closing EventBus...");
+                        running = false;
+                        try {
+                            eventBus.stop();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }));
+                    return;
+                case 3:
                     TeamService teamService = new TeamService();
                     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                         out.println("Closing TeamService...");
@@ -45,10 +60,10 @@ public final class App {
                         }
                     }));
                     return;
-                case 3:
+                case 4:
                     // MatchService
                     return;
-                case 4:
+                case 5:
                     // NotificationService
                     return;
             }

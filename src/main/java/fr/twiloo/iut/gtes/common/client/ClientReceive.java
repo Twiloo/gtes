@@ -1,39 +1,38 @@
 package fr.twiloo.iut.gtes.common.client;
 
-import fr.twiloo.iut.gtes.common.model.dto.Response;
+import fr.twiloo.iut.gtes.common.model.Event;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
-/**
- * @param <R> Response class (here I use it as notification class because I don't want/need to complexify this anymore
- */
-public final class ClientReceive<R extends Response<?>> implements Runnable {
+public final class ClientReceive implements Runnable {
     private final ObjectInputStream in;
+    private final EventDispatcher eventDispatcher;
 
-    public ClientReceive(ObjectInputStream notificationIn) {
-        this.in = notificationIn;
+    public ClientReceive(ObjectInputStream in, EventDispatcher eventDispatcher) {
+        this.in = in;
+        this.eventDispatcher = eventDispatcher;
     }
 
     @Override
     public void run() {
         try {
             while (true) {
-                Object notification = in.readObject();
-                boolean correctNotification = notification instanceof Response<?> &&
-                        notification.getClass().equals(this.getClass().getDeclaredClasses()[0]);
-                if (correctNotification) {
-                    handleNotification((R) notification);
+                Object event = in.readObject();
+                if (event instanceof Event<?>) {
+                    handleNotification((Event<?>) event);
                 } else {
-                    throw new IllegalStateException("Invalid notification type received from service.");
+                    throw new IllegalStateException("Invalid event received from event bus.");
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Notification listener stopped: " + e.getMessage());
+            System.err.println("Event listener stopped: " + e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
-    private void handleNotification(R notification) {
-        System.out.println("Notification reçue : " + notification.getContent());
+    private void handleNotification(Event<?> event) throws Exception {
+        eventDispatcher.dispatch(event);
     }
 }

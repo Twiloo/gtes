@@ -1,6 +1,8 @@
 package fr.twiloo.iut.gtes.microservices.service.team;
 
 import fr.twiloo.iut.gtes.common.ServiceConfig;
+import fr.twiloo.iut.gtes.common.client.EventDispatcher;
+import fr.twiloo.iut.gtes.common.model.Event;
 import fr.twiloo.iut.gtes.common.model.Team;
 import fr.twiloo.iut.gtes.common.model.dto.request.team.TeamRequest;
 import fr.twiloo.iut.gtes.common.model.dto.request.team.UpdateTeamRequest;
@@ -12,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public final class TeamService extends CallableService<TeamRequest<?>, TeamResponse<?>> {
+public final class TeamService implements EventDispatcher {
     private final List<Team> teams = new ArrayList<>();
 
     public TeamService() throws IOException {
@@ -24,7 +26,7 @@ public final class TeamService extends CallableService<TeamRequest<?>, TeamRespo
     }
 
     @Override
-    public TeamResponse<?> dispatch(TeamRequest<?> request) throws Exception {
+    public void dispatch(Event<?> event) throws Exception {
         return switch (request.getAction()) {
             case CREATE_TEAM -> createTeam((Team) request.getPayload());
             case LIST_TEAMS -> listTeams();
