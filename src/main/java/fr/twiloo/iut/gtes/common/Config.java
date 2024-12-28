@@ -5,7 +5,7 @@ public enum Config {
 
     public final int port;
 
-    private Config(int port) {
+    Config(int port) {
         this.port = port;
     }
 }

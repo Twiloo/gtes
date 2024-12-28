@@ -12,13 +12,16 @@ import java.net.Socket;
 public final class Client implements Closeable {
     private final Socket socket;
     private final ObjectOutputStream out;
-
     private final Thread clientReceiveThread;
 
     public Client(Config config, EventDispatcher eventDispatcher) throws IOException {
         // Socket for synchronous events produced by client
         socket = new Socket("127.0.0.1", config.port);
         out = new ObjectOutputStream(socket.getOutputStream());
+
+        // Send subscription list to event bus
+        out.writeObject(eventDispatcher.supportedEventTypes());
+        out.flush();
 
         // Thread for async events coming from event bus (like a webhook, you subscribe by connecting to said events)
         ClientReceive clientReceive = new ClientReceive(new ObjectInputStream(socket.getInputStream()), eventDispatcher);
@@ -40,14 +43,8 @@ public final class Client implements Closeable {
     public void close() throws IOException {
         try {
             clientReceiveThread.interrupt();
-        } catch (Exception ignored) {
-        }
-
-        // Close all sockets and streams
-        requestSocket.close();
-        if (notificationSocket != null)
-            notificationSocket.close();
-
-        eventOut.close();
+        } catch (Exception ignored) { }
+        socket.close();
+        out.close();
     }
 }

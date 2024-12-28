@@ -2,8 +2,9 @@ package fr.twiloo.iut.gtes;
 
 import fr.twiloo.iut.gtes.common.Config;
 import fr.twiloo.iut.gtes.eventbus.EventBus;
-import fr.twiloo.iut.gtes.microservices.service.team.TeamService;
+import fr.twiloo.iut.gtes.microservices.team.TeamService;
 import fr.twiloo.iut.gtes.mvc.MVCApp;
+import fr.twiloo.iut.gtes.mvc.controller.DefaultController;
 
 import java.io.IOException;
 import java.util.Scanner;
@@ -34,7 +35,16 @@ public final class App {
             }
             switch (option) {
                 case 1:
-                    new MVCApp();
+                    MVCApp.getInstance();
+                    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                        out.println("Closing MVCApp...");
+                        running = false;
+                        try {
+                            DefaultController.closeApp();
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }));
                     return;
                 case 2:
                     EventBus eventBus = new EventBus(Config.EVENT_BUS.port);
@@ -53,11 +63,7 @@ public final class App {
                     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                         out.println("Closing TeamService...");
                         running = false;
-                        try {
-                            teamService.stop();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
+                        teamService.stop();
                     }));
                     return;
                 case 4:

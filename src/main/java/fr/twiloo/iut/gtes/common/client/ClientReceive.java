@@ -20,7 +20,7 @@ public final class ClientReceive implements Runnable {
             while (true) {
                 Object event = in.readObject();
                 if (event instanceof Event<?>) {
-                    handleNotification((Event<?>) event);
+                    handleEvent((Event<?>) event);
                 } else {
                     throw new IllegalStateException("Invalid event received from event bus.");
                 }
@@ -32,7 +32,7 @@ public final class ClientReceive implements Runnable {
         }
     }
 
-    private void handleNotification(Event<?> event) throws Exception {
+    private void handleEvent(Event<?> event) {
         eventDispatcher.dispatch(event);
     }
 }

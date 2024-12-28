@@ -1,13 +1,16 @@
 package fr.twiloo.iut.gtes.mvc.controller;
 
 import fr.twiloo.iut.gtes.App;
+import fr.twiloo.iut.gtes.mvc.MVCApp;
 import fr.twiloo.iut.gtes.mvc.view.View;
+
+import java.io.IOException;
 
 import static java.lang.System.out;
 
 public final class DefaultController {
 
-    public static void defaultAction() {
+    public static void defaultAction() throws IOException {
         while (true) {
             out.println(View.DEFAULT_MENU);
             int option;
@@ -19,7 +22,7 @@ public final class DefaultController {
             }
             switch (option) {
                 case 1:
-                    TeamController.listTeamsAction();
+                    TeamController.getTeamsListAction();
                     break;
                 case 2:
                     TeamController.addTeamAction();
@@ -59,12 +62,15 @@ public final class DefaultController {
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
-//            try {
-//                ClientManager.getInstance().closeClients();
-//            } catch (IOException ioException) {
-//                throw new RuntimeException(ioException);
-//            }
-            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                MVCApp.getInstance().getClient().close();
+            } catch (IOException ignored) { }
+            finally {
+                App.sc.close();
+                Thread.currentThread().interrupt();
+            }
         }
     }
 }

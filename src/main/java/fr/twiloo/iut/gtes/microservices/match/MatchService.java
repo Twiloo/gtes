@@ -1,46 +1,46 @@
-package fr.twiloo.iut.gtes.microservices.service.match;
-
-import fr.twiloo.iut.gtes.mvc.event.match.MatchFinishedEvent;
-import fr.twiloo.iut.gtes.mvc.event.update.RankingUpdatedEvent;
-
-import java.util.Map;
-
-import static java.lang.System.out;
-
-public class MatchService {
-
-    public void organizeMatch(String team1, int score1, String team2, int score2, Map<String, Integer> teamScores) {
-        out.println("\n=== Organizing Match ===");
-        out.println(team1 + " [" + score1 + "] vs " + team2 + " [" + score2 + "]");
-
-        int pointsTeam1 = 0, pointsTeam2 = 0;
-
-        // Calculate points
-        if (score1 > score2) {
-            pointsTeam1 = 3;
-            out.println(team1 + " wins!");
-        } else if (score1 < score2) {
-            pointsTeam2 = 3;
-            out.println(team2 + " wins!");
-        } else {
-            pointsTeam1 = 1;
-            pointsTeam2 = 1;
-            out.println("It's a draw!");
-        }
-
-        // Update team scores
-        teamScores.put(team1, teamScores.get(team1) + pointsTeam1);
-        teamScores.put(team2, teamScores.get(team2) + pointsTeam2);
-
-        // Publish MatchFinishedEvent
-        MatchFinishedEvent event = new MatchFinishedEvent(team1, score1, team2, score2);
-        out.println("Event Published: " + event.getName());
-
-        // Publish RankingUpdatedEvent
-        RankingUpdatedEvent rankingEvent = new RankingUpdatedEvent(teamScores);
-        out.println("Event Published: " + rankingEvent.getName());
-    }
-}
+package fr.twiloo.iut.gtes.microservices.match;
+//
+//import fr.twiloo.iut.gtes.mvc.event.match.MatchFinishedEvent;
+//import fr.twiloo.iut.gtes.mvc.event.update.RankingUpdatedEvent;
+//
+//import java.util.Map;
+//
+//import static java.lang.System.out;
+//
+//public class MatchService {
+//
+//    public void organizeMatch(String team1, int score1, String team2, int score2, Map<String, Integer> teamScores) {
+//        out.println("\n=== Organizing Match ===");
+//        out.println(team1 + " [" + score1 + "] vs " + team2 + " [" + score2 + "]");
+//
+//        int pointsTeam1 = 0, pointsTeam2 = 0;
+//
+//        // Calculate points
+//        if (score1 > score2) {
+//            pointsTeam1 = 3;
+//            out.println(team1 + " wins!");
+//        } else if (score1 < score2) {
+//            pointsTeam2 = 3;
+//            out.println(team2 + " wins!");
+//        } else {
+//            pointsTeam1 = 1;
+//            pointsTeam2 = 1;
+//            out.println("It's a draw!");
+//        }
+//
+//        // Update team scores
+//        teamScores.put(team1, teamScores.get(team1) + pointsTeam1);
+//        teamScores.put(team2, teamScores.get(team2) + pointsTeam2);
+//
+//        // Publish MatchFinishedEvent
+//        MatchFinishedEvent event = new MatchFinishedEvent(team1, score1, team2, score2);
+//        out.println("Event Published: " + event.getName());
+//
+//        // Publish RankingUpdatedEvent
+//        RankingUpdatedEvent rankingEvent = new RankingUpdatedEvent(teamScores);
+//        out.println("Event Published: " + rankingEvent.getName());
+//    }
+//}
 
 
 /*
@@ -52,7 +52,7 @@ import fr.twiloo.iut.gtes.common.model.Team;
 
 import java.io.IOException;
 
-public class MatchService extends CallableService {
+public class MatchService {
 
     private Match currentMatch;  // Stocke le match actuel en cours
 

@@ -8,6 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 
 public final class Subscriber implements Runnable {
     private final ArrayList<EventType> subscribedEvents = new ArrayList<>();
@@ -73,8 +74,8 @@ public final class Subscriber implements Runnable {
             throw new RuntimeException(e);
         }
 
-        if (subscription instanceof ArrayList<?> && !((ArrayList<?>) subscription).isEmpty()) {
-            for (Object eventType : (ArrayList<?>) subscription) {
+        if (subscription instanceof List<?> && !((List<?>) subscription).isEmpty()) {
+            for (Object eventType : (List<?>) subscription) {
                 if (eventType instanceof EventType) {
                     subscribedEvents.add((EventType) eventType);
                 }

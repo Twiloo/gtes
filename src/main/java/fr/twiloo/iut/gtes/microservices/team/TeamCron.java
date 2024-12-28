@@ -1,4 +1,4 @@
-package fr.twiloo.iut.gtes.microservices.service.team;
+package fr.twiloo.iut.gtes.microservices.team;
 
 import fr.twiloo.iut.gtes.common.model.Team;
 
