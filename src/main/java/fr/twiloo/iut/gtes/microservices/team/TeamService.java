@@ -5,7 +5,6 @@ import fr.twiloo.iut.gtes.common.EventType;
 import fr.twiloo.iut.gtes.common.model.Event;
 import fr.twiloo.iut.gtes.common.model.Match;
 import fr.twiloo.iut.gtes.common.model.Team;
-import fr.twiloo.iut.gtes.common.model.dto.Pair;
 import fr.twiloo.iut.gtes.microservices.Service;
 
 import java.io.IOException;
@@ -34,7 +33,7 @@ public final class TeamService extends Service {
         switch (event.type()) {
             case GET_TEAMS_LIST -> listTeams();
             case CREATE_TEAM -> createTeam((Team) event.payload());
-            case UPDATE_TEAM -> updateTeam((Pair<String, Team>) event.payload());
+            case UPDATE_TEAM -> updateTeam((TeamUpdate) event.payload());
             case DELETE_TEAM -> deleteTeam((String) event.payload());
             case MATCH_FINISHED -> updateRanking((Match) event.payload());
         }
@@ -54,13 +53,18 @@ public final class TeamService extends Service {
                 payload.getName() == null || payload.getName().isEmpty() ||
                 payload.getPlayers() == null || payload.getPlayers().size() != 3 ||
                 findTeam(payload.getName()) != null) {
+            // Équipe invalide ou déjà existante
             sendEvent(new Event<>(EventType.NEW_TEAM_CREATED, null));
             return;
         }
+
+        // Création de l'équipe avec des valeurs par défaut
         Team team = new Team(payload.getPlayers(), payload.getName(), 500, 0, true);
         synchronized (teams) {
             teams.add(team);
         }
+
+        // Notification de la création de l'équipe
         sendEvent(new Event<>(EventType.NEW_TEAM_CREATED, team));
     }
 
@@ -74,19 +78,16 @@ public final class TeamService extends Service {
         }
     }
 
-    /**
-     * This performs patch like update (null values from the payload are kept as the original ones)
-     */
-    private void updateTeam(Pair<String, Team> payload) {
+    private void updateTeam(TeamUpdate payload) {
         Team team = null;
-        if (payload != null && payload.value() != null)
-            team = findTeam(payload.key());
+        if (payload != null && payload.getValue() != null)
+            team = findTeam(payload.getKey());
         if (team == null) {
             sendEvent(new Event<>(EventType.TEAM_UPDATED, null));
             return;
         }
 
-        Team newTeam = payload.value();
+        Team newTeam = payload.getValue();
         if (newTeam.getName() != null && !newTeam.getName().isEmpty() && findTeam(newTeam.getName()) == null)
             team.setName(newTeam.getName());
 
@@ -107,7 +108,7 @@ public final class TeamService extends Service {
     }
 
     private void updateRanking(Match match) {
-        // Take match results to update teams elo and then ranking
+        // Mise à jour des classements en fonction des résultats du match
     }
 
     private Team findTeam(String name) {
@@ -123,5 +124,26 @@ public final class TeamService extends Service {
     public void stop() {
         super.stop();
         teamCron.stop();
+    }
+
+    /**
+     * Classe interne pour les mises à jour partielles d'équipe.
+     */
+    private static class TeamUpdate {
+        private final String key;
+        private final Team value;
+
+        public TeamUpdate(String key, Team value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public Team getValue() {
+            return value;
+        }
     }
 }
