@@ -6,7 +6,4 @@ import java.io.Serializable;
 public record Event<P>(
         EventType type,
         P payload) implements Serializable {
-
-    private static final long serialVersionUID = 1L; // Ajoutez un UID pour assurer la compatibilité
-
 }

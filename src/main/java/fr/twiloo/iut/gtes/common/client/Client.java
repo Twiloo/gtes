@@ -36,11 +36,6 @@ public final class Client implements Closeable {
         }
     }
 
-    /**
-     * Envoi d'un événement au bus d'événements.
-     *
-     * @param event L'événement à envoyer.
-     */
     public void sendEvent(Event<?> event) {
         if (event == null || event.type() == null) {
             throw new IllegalArgumentException("L'événement ou son type ne peut pas être nul.");

@@ -41,15 +41,15 @@ public final class NotificationService extends Service {
     private void sendMatchCreatedNotification(Match match) {
         if (match != null) {
             System.out.println("Notification: Nouveau match créé entre "
-                    + match.getTeam1() + " et " + match.getTeam2() + ".");
+                    + match.getTeamAName() + " et " + match.getTeamBName() + ".");
         }
     }
 
     private void sendMatchFinishedNotification(Match match) {
         if (match != null) {
             System.out.println("Notification: Match terminé ! Résultat - "
-                    + match.getTeam1() + ": " + match.getScore1() + " vs "
-                    + match.getTeam2() + ": " + match.getScore2());
+                    + match.getTeamAName() + ": " + match.getScoreA() + " vs "
+                    + match.getTeamBName() + ": " + match.getScoreB());
         }
     }
 

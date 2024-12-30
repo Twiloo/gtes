@@ -16,5 +16,4 @@ public enum EventType {
     SET_MATCH_RESULTS,
     MATCH_FINISHED,
     RANKING_UPDATED,
-    MATCH_ORGANIZED,
 }

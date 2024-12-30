@@ -5,6 +5,7 @@ import fr.twiloo.iut.gtes.common.EventType;
 import fr.twiloo.iut.gtes.common.model.Event;
 import fr.twiloo.iut.gtes.common.model.Match;
 import fr.twiloo.iut.gtes.common.model.Team;
+import fr.twiloo.iut.gtes.common.model.TeamUpdate;
 import fr.twiloo.iut.gtes.microservices.Service;
 
 import java.io.IOException;
@@ -80,14 +81,14 @@ public final class TeamService extends Service {
 
     private void updateTeam(TeamUpdate payload) {
         Team team = null;
-        if (payload != null && payload.getValue() != null)
-            team = findTeam(payload.getKey());
+        if (payload != null && payload.value() != null)
+            team = findTeam(payload.key());
         if (team == null) {
             sendEvent(new Event<>(EventType.TEAM_UPDATED, null));
             return;
         }
 
-        Team newTeam = payload.getValue();
+        Team newTeam = payload.value();
         if (newTeam.getName() != null && !newTeam.getName().isEmpty() && findTeam(newTeam.getName()) == null)
             team.setName(newTeam.getName());
 
@@ -124,26 +125,5 @@ public final class TeamService extends Service {
     public void stop() {
         super.stop();
         teamCron.stop();
-    }
-
-    /**
-     * Classe interne pour les mises à jour partielles d'équipe.
-     */
-    private static class TeamUpdate {
-        private final String key;
-        private final Team value;
-
-        public TeamUpdate(String key, Team value) {
-            this.key = key;
-            this.value = value;
-        }
-
-        public String getKey() {
-            return key;
-        }
-
-        public Team getValue() {
-            return value;
-        }
     }
 }

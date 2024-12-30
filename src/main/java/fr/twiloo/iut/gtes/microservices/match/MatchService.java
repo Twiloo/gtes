@@ -63,21 +63,21 @@ public final class MatchService extends Service {
      * @param match Le match à créer.
      */
     private void createMatch(Match match) {
-        if (match == null || match.getTeam1() == null || match.getTeam2() == null) {
+        if (match == null || match.getTeamAName() == null || match.getTeamBName() == null) {
             sendEvent(new Event<>(EventType.MATCH_CANCELED, null));
             return;
         }
 
-        Team team1 = findTeam(String.valueOf(match.getTeam1()));
-        Team team2 = findTeam(String.valueOf(match.getTeam2()));
+        Team teamA = findTeam(String.valueOf(match.getTeamAName()));
+        Team teamB = findTeam(String.valueOf(match.getTeamBName()));
 
-        if (team1 == null || team2 == null) {
+        if (teamA == null || teamB == null) {
             sendEvent(new Event<>(EventType.MATCH_CANCELED, null));
             return;
         }
 
         // Match validé et organisé
-        sendEvent(new Event<>(EventType.MATCH_ORGANIZED, match));
+        sendEvent(new Event<>(EventType.CREATE_MATCH, match));
     }
 
     /**
@@ -86,10 +86,10 @@ public final class MatchService extends Service {
      * @param match Le match terminé.
      */
     private void finishMatch(Match match) {
-        Team team1 = findTeam(String.valueOf(match.getTeam1()));
-        Team team2 = findTeam(String.valueOf(match.getTeam2()));
+        Team teamA = findTeam(String.valueOf(match.getTeamAName()));
+        Team teamB = findTeam(String.valueOf(match.getTeamBName()));
 
-        if (team1 == null || team2 == null) {
+        if (teamA == null || teamB == null) {
             sendEvent(new Event<>(EventType.MATCH_CANCELED, null));
             return;
         }
