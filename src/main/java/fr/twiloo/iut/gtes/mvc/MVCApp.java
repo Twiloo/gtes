@@ -31,9 +31,9 @@ public final class MVCApp implements EventDispatcher {
     }
 
     @Override
-    public void dispatch(Event<?> event) {
+    public void dispatch(Event<?> event) throws IOException {
         switch (event.type()) {
-            case SHOW_TEAMS_LIST -> TeamController.showTeamsListAction(event);
+            case SHOW_TEAMS_LIST -> TeamController.showTeamsListAction();
         }
     }
 

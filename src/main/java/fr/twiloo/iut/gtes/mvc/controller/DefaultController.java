@@ -22,8 +22,13 @@ public final class DefaultController {
             }
             switch (option) {
                 case 1:
-                    TeamController.getTeamsListAction();
+                    try {
+                        TeamController.showTeamsListAction();
+                    } catch (IOException e) {
+                        out.println("Une erreur s'est produite lors de l'affichage de la liste des équipes : " + e.getMessage());
+                    }
                     break;
+
                 case 2:
                     TeamController.addTeamAction();
                     break;
