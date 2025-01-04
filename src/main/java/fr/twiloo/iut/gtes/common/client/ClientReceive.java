@@ -34,24 +34,18 @@ public final class ClientReceive implements Runnable, Closeable {
                     System.err.println("Événement invalide reçu : " + event);
                 }
             }
-        } catch (IOException e) {
-            System.err.println("Écoute des événements arrêtée : " + e.getMessage());
+        } catch (IOException ignored) {
         } finally {
             close(); // Fermeture sécurisée en fin de boucle
+            eventDispatcher.close();
         }
     }
 
     /**
      * Traitement de l'événement reçu.
-     *
-     * @param event L'événement à traiter.
      */
     private void handleEvent(Event<?> event) {
-        try {
-            eventDispatcher.dispatch(event);
-        } catch (Exception e) {
-            System.err.println("Erreur lors du traitement de l'événement : " + e.getMessage());
-        }
+        eventDispatcher.dispatch(event);
     }
 
     /**

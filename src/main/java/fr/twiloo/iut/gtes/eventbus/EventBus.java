@@ -20,15 +20,18 @@ public final class EventBus {
     }
 
     public void addSubscriber(Subscriber subscriber) {
+        out.println("Subscriber added: " + subscriber);
         subscribers.add(subscriber);
     }
 
     public void disconnectSubscriber(Subscriber subscriber) throws IOException {
-        subscriber.closeSubscriber();
+        out.println("Subscriber disconnected: " + subscriber);
+        subscriber.closeSubscriberSafely();
         subscribers.remove(subscriber);
     }
 
     public void dispatch(Event<?> event) throws IOException {
+        out.println("Event dispatched: " + event);
         for (Subscriber subscriber : subscribers) {
             subscriber.notify(event);
         }
@@ -39,10 +42,10 @@ public final class EventBus {
     }
 
     public void stop() throws IOException {
-        for (Subscriber subscriber : subscribers) {
-            subscriber.closeSubscriber();
+        while (!subscribers.isEmpty()) {
+            disconnectSubscriber(subscribers.getFirst());
         }
         connection.stop();
-        System.out.println("Service stopped");
+        System.out.println("EventBus stopped");
     }
 }

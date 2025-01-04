@@ -26,9 +26,7 @@ public final class TeamCron implements Runnable {
                 }
 
                 Thread.sleep(300000); // wait 5 minutes for next cron task
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            } catch (InterruptedException ignored) { }
         }
     }
 

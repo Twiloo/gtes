@@ -6,29 +6,44 @@ import fr.twiloo.iut.gtes.mvc.view.View;
 
 import java.io.IOException;
 
+import static java.lang.System.exit;
 import static java.lang.System.out;
 
 public final class DefaultController {
+    private static boolean running = true;
+
+    public static void startDefaultActionAsync() {
+        Thread defaultActionThread = new Thread(() -> {
+            try {
+                defaultAction();
+            } catch (IOException e) {
+                out.println("Erreur (tout est cassé) : " + e.getMessage());
+            }
+        });
+        defaultActionThread.setDaemon(true); // Ensures the thread doesn’t prevent JVM shutdown
+        defaultActionThread.start();
+    }
 
     public static void defaultAction() throws IOException {
-        while (true) {
+        while (running) {
             out.println(View.DEFAULT_MENU);
             int option;
             try {
                 option = App.sc.nextInt();
             } catch (Exception e) {
+                if (!running)
+                    return;
                 App.sc.nextLine();
                 continue;
             }
             switch (option) {
                 case 1:
                     try {
-                        TeamController.showTeamsListAction();
+                        TeamController.getTeamListAction();
                     } catch (IOException e) {
                         out.println("Une erreur s'est produite lors de l'affichage de la liste des équipes : " + e.getMessage());
                     }
                     break;
-
                 case 2:
                     TeamController.addTeamAction();
                     break;
@@ -49,21 +64,23 @@ public final class DefaultController {
                     return;
                 case 8:
                     // Arrêter l'application
-                    closeApp();
-                    return;
+                    closeApplicationAction();
+                    exit(0);
             }
             App.sc.nextLine();
             out.println();
             try {
-                Thread.sleep(2000);
+                Thread.sleep(1000);
+                out.println();
             } catch (InterruptedException e) {
-                closeApp();
+                closeApplicationAction();
             }
         }
     }
 
-    public static void closeApp() {
+    public static void closeApplicationAction() {
         out.println("Closing application...");
+        running = false;
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
@@ -74,7 +91,6 @@ public final class DefaultController {
             } catch (IOException ignored) { }
             finally {
                 App.sc.close();
-                Thread.currentThread().interrupt();
             }
         }
     }

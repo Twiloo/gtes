@@ -7,6 +7,7 @@ import fr.twiloo.iut.gtes.mvc.MVCApp;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 import static java.lang.System.out;
@@ -43,12 +44,14 @@ public final class TeamController {
         out.println("Équipe ajoutée avec succès (en attente de confirmation du serveur).");
     }
 
-    public static void showTeamsListAction() throws IOException {
-        // Envoyer une demande pour récupérer les équipes
+    public static void getTeamListAction() throws IOException {
         MVCApp.getInstance().getClient().sendEvent(new Event<>(EventType.GET_TEAMS_LIST, null));
-
-        // Ici, l'attente d'une réponse peut être ajoutée si le bus d'événements est asynchrone
-        System.out.println("Demande envoyée pour afficher la liste des équipes. Veuillez attendre...");
     }
 
+    public static void showTeamsListAction(List<?> teams) {
+        out.println("Liste des équipes : ");
+        for (Object team : teams) {
+            out.println(team);
+        }
+    }
 }

@@ -4,8 +4,6 @@ import fr.twiloo.iut.gtes.common.Config;
 import fr.twiloo.iut.gtes.eventbus.EventBus;
 import fr.twiloo.iut.gtes.microservices.team.TeamService;
 import fr.twiloo.iut.gtes.mvc.MVCApp;
-import fr.twiloo.iut.gtes.mvc.controller.DefaultController;
-import fr.twiloo.iut.gtes.mvc.controller.TeamController;
 
 import java.io.IOException;
 import java.util.Scanner;
@@ -38,21 +36,17 @@ public final class App {
             switch (option) {
                 case 1:
                     MVCApp.getInstance();
-                    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                        out.println("Closing MVCApp...");
-                        running = false;
-                        try {
-                            DefaultController.closeApp();
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    }));
                     return;
                 case 2:
                     EventBus eventBus = new EventBus(Config.EVENT_BUS.port);
                     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                         out.println("Closing EventBus...");
                         running = false;
+                        try {
+                            eventBus.stop();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
                     }));
                     return;
                 case 3:
@@ -61,7 +55,7 @@ public final class App {
                     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                         out.println("Closing TeamService...");
                         running = false;
-                        teamService.stop();
+                        teamService.close();
                     }));
                     return;
                 case 4:

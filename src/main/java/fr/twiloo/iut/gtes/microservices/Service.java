@@ -7,18 +7,26 @@ import fr.twiloo.iut.gtes.common.model.Event;
 
 import java.io.IOException;
 
+import static java.lang.System.out;
+
 public abstract class Service implements EventDispatcher {
-    private final Client client;
+    protected final Client client;
 
     protected Service() throws IOException {
         client = new Client(getConfig(), this);
     }
 
+    @Override
+    public void dispatch(Event<?> event) {
+        out.println("Event " + event.type() + " received");
+    }
+
     protected void sendEvent(Event<?> event) {
+        out.println("Sending event: " + event.type());
         client.sendEvent(event);
     }
 
-    public void stop() {
+    public void close() {
         try {
             client.close();
         } catch (IOException e) {

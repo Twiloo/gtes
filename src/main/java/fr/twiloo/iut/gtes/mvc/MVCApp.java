@@ -10,20 +10,26 @@ import fr.twiloo.iut.gtes.mvc.controller.TeamController;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public final class MVCApp implements EventDispatcher {
-    private static MVCApp instance;
+    private static final AtomicReference<MVCApp> instance = new AtomicReference<>();
     private final Client client;
 
     public static MVCApp getInstance() throws IOException {
-        if (instance == null)
-            instance = new MVCApp();
-        return instance;
+        if (instance.get() == null) {  // First check (no synchronization)
+            synchronized (MVCApp.class) {
+                if (instance.get() == null) {  // Second check (with synchronization)
+                    instance.set(new MVCApp());
+                }
+            }
+        }
+        return instance.get();
     }
 
     private MVCApp() throws IOException {
         client = new Client(Config.EVENT_BUS, this);
-        DefaultController.defaultAction();
+        DefaultController.startDefaultActionAsync();
     }
 
     public Client getClient() {
@@ -31,9 +37,9 @@ public final class MVCApp implements EventDispatcher {
     }
 
     @Override
-    public void dispatch(Event<?> event) throws IOException {
+    public void dispatch(Event<?> event) {
         switch (event.type()) {
-            case SHOW_TEAMS_LIST -> TeamController.showTeamsListAction();
+            case SHOW_TEAMS_LIST -> TeamController.showTeamsListAction((List<?>)  event.payload());
         }
     }
 
@@ -47,5 +53,10 @@ public final class MVCApp implements EventDispatcher {
                 EventType.MATCH_CANCELED,
                 EventType.MATCH_FINISHED,
                 EventType.RANKING_UPDATED);
+    }
+
+    @Override
+    public void close() {
+        Runtime.getRuntime().exit(1);
     }
 }

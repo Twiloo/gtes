@@ -5,7 +5,7 @@ import fr.twiloo.iut.gtes.common.EventType;
 import fr.twiloo.iut.gtes.common.model.Event;
 import fr.twiloo.iut.gtes.common.model.Match;
 import fr.twiloo.iut.gtes.common.model.Team;
-import fr.twiloo.iut.gtes.common.model.TeamUpdate;
+import fr.twiloo.iut.gtes.common.model.dto.TeamUpdate;
 import fr.twiloo.iut.gtes.microservices.Service;
 
 import java.io.IOException;
@@ -16,12 +16,13 @@ import java.util.List;
 public final class TeamService extends Service {
     private final List<Team> teams = new ArrayList<>();
     private final TeamCron teamCron;
+    private final Thread cronThread;
 
     public TeamService() throws IOException {
         super();
         teamCron = new TeamCron(teams);
-        Thread t = new Thread(teamCron);
-        t.start();
+        cronThread = new Thread(teamCron);
+        cronThread.start();
     }
 
     @Override
@@ -31,6 +32,7 @@ public final class TeamService extends Service {
 
     @Override
     public void dispatch(Event<?> event) {
+        super.dispatch(event);
         switch (event.type()) {
             case GET_TEAMS_LIST -> listTeams();
             case CREATE_TEAM -> createTeam((Team) event.payload());
@@ -60,7 +62,7 @@ public final class TeamService extends Service {
         }
 
         // Création de l'équipe avec des valeurs par défaut
-        Team team = new Team(payload.getPlayers(), payload.getName(), 500, 0, true);
+        Team team = new Team(payload.getPlayers(), payload.getName(), 500, -1, true);
         synchronized (teams) {
             teams.add(team);
         }
@@ -122,8 +124,9 @@ public final class TeamService extends Service {
     }
 
     @Override
-    public void stop() {
-        super.stop();
+    public void close() {
+        super.close();
         teamCron.stop();
+        cronThread.interrupt();
     }
 }

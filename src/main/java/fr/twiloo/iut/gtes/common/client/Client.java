@@ -13,6 +13,7 @@ public final class Client implements Closeable {
     private final Socket socket;
     private final ObjectOutputStream out;
     private final Thread clientReceiveThread;
+    private final ClientReceive clientReceive;
 
     public Client(Config config, EventDispatcher eventDispatcher) throws IOException {
         // Établir la connexion au Bus d'Événements
@@ -25,11 +26,11 @@ public final class Client implements Closeable {
             out.flush();
 
             // Initialiser le thread de réception pour gérer les événements asynchrones
-            ClientReceive clientReceive = new ClientReceive(new ObjectInputStream(socket.getInputStream()), eventDispatcher);
+            clientReceive = new ClientReceive(new ObjectInputStream(socket.getInputStream()), eventDispatcher);
             clientReceiveThread = new Thread(clientReceive);
             clientReceiveThread.start();
 
-            System.out.println("Connecté au bus d'événements : " + socket.getRemoteSocketAddress() + " sur le port " + socket.getPort());
+            System.out.println("Connecté au bus d'événements : " + socket.getRemoteSocketAddress());
         } catch (IOException e) {
             // En cas d'échec de la connexion
             throw new IOException("Impossible de se connecter au bus d'événements.", e);
@@ -53,9 +54,9 @@ public final class Client implements Closeable {
     public void close() throws IOException {
         try {
             // Interrompre le thread de réception
+            clientReceive.stop();
             clientReceiveThread.interrupt();
-        } catch (Exception ignored) {
-        }
+        } catch (Exception ignored) {  }
 
         try {
             // Fermer le socket

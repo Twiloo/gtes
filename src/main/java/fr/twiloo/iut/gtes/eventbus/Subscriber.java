@@ -29,9 +29,7 @@ public final class Subscriber implements Runnable {
         makeSubscription();
         try {
             listenProducedEvents();
-        } finally {
-            closeSubscriberSafely();
-        }
+        } catch (Exception ignored) { }
     }
 
     private void listenProducedEvents() {
@@ -41,7 +39,11 @@ public final class Subscriber implements Runnable {
                 event = in.readObject();
             } catch (IOException | ClassNotFoundException e) {
                 System.err.println("Error while receiving event: " + e.getMessage());
-                closeSubscriberSafely();
+                try {
+                    eventBus.disconnectSubscriber(this);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
                 break;
             }
 
@@ -75,16 +77,18 @@ public final class Subscriber implements Runnable {
         } catch (IOException | ClassNotFoundException e) {
             System.err.println("Error during subscription: " + e.getMessage());
         }
+        System.out.println("New subscription: " + this);
     }
 
     public void notify(Event<?> event) throws IOException {
         if (event != null && event.type() != null && subscribedEvents.contains(event.type())) {
+            System.out.println("Receiver : " + this.hashCode());
             out.writeObject(event);
             out.flush();
         }
     }
 
-    private void closeSubscriberSafely() {
+    public void closeSubscriberSafely() {
         try {
             if (!socket.isClosed())
                 socket.close();
@@ -105,9 +109,8 @@ public final class Subscriber implements Runnable {
         }
     }
 
-    public void closeSubscriber() throws IOException {
-        in.close();
-        out.close();
-        socket.close();
+    @Override
+    public String toString() {
+        return this.hashCode() + ": " + subscribedEvents;
     }
 }
