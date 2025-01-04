@@ -39,21 +39,17 @@ public final class Subscriber implements Runnable {
             Object event;
             try {
                 event = in.readObject();
-            } catch (IOException e) {
-                // Handle client disconnection
-                System.err.println("Client disconnected : " + e.getMessage());
+            } catch (IOException | ClassNotFoundException e) {
+                System.err.println("Error while receiving event: " + e.getMessage());
                 closeSubscriberSafely();
                 break;
-            } catch (ClassNotFoundException e) {
-                System.err.println("Received invalid event: " + e.getMessage());
-                continue;
             }
 
             if (!(event instanceof Event<?> && ((Event<?>) event).type() != null)) {
                 try {
                     eventBus.disconnectSubscriber(this);
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    System.err.println("Error disconnecting subscriber: " + e.getMessage());
                 }
                 break;
             }
@@ -61,25 +57,23 @@ public final class Subscriber implements Runnable {
             try {
                 eventBus.dispatch((Event<?>) event);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                System.err.println("Error dispatching event: " + e.getMessage());
             }
         }
     }
 
     private void makeSubscription() {
-        Object subscription;
         try {
-            subscription = in.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-
-        if (subscription instanceof List<?> && !((List<?>) subscription).isEmpty()) {
-            for (Object eventType : (List<?>) subscription) {
-                if (eventType instanceof EventType) {
-                    subscribedEvents.add((EventType) eventType);
+            Object subscription = in.readObject();
+            if (subscription instanceof List<?> && !((List<?>) subscription).isEmpty()) {
+                for (Object eventType : (List<?>) subscription) {
+                    if (eventType instanceof EventType) {
+                        subscribedEvents.add((EventType) eventType);
+                    }
                 }
             }
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println("Error during subscription: " + e.getMessage());
         }
     }
 

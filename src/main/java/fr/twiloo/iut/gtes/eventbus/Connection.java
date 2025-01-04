@@ -20,14 +20,16 @@ public final class Connection implements Runnable {
             try {
                 socketNewSubscriber = serverSocket.accept();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                System.err.println("Error accepting new connection: " + e.getMessage());
+                continue;
             }
 
             Subscriber subscriber;
             try {
                 subscriber = new Subscriber(eventBus, socketNewSubscriber);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                System.err.println("Error creating subscriber: " + e.getMessage());
+                continue;
             }
 
             eventBus.addSubscriber(subscriber);
