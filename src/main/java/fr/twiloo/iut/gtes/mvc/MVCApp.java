@@ -5,9 +5,12 @@ import fr.twiloo.iut.gtes.common.EventType;
 import fr.twiloo.iut.gtes.common.client.Client;
 import fr.twiloo.iut.gtes.common.client.EventDispatcher;
 import fr.twiloo.iut.gtes.common.model.Event;
+import fr.twiloo.iut.gtes.common.model.Match;
 import fr.twiloo.iut.gtes.common.model.Team;
 import fr.twiloo.iut.gtes.common.model.dto.TeamDeleted;
+import fr.twiloo.iut.gtes.common.model.dto.TeamUpdated;
 import fr.twiloo.iut.gtes.mvc.controller.DefaultController;
+import fr.twiloo.iut.gtes.mvc.controller.MatchController;
 import fr.twiloo.iut.gtes.mvc.controller.TeamController;
 
 import java.io.IOException;
@@ -38,8 +41,11 @@ public final class MVCApp implements EventDispatcher {
         switch (event.type()) {
             case SHOW_TEAMS_LIST -> TeamController.showTeamsListAction((List<?>)  event.payload());
             case NEW_TEAM_CREATED -> TeamController.showNewTeamCreatedAction((Team) event.payload());
-            case TEAM_UPDATED -> TeamController.showTeamUpdatedAction((Team) event.payload());
+            case TEAM_UPDATED -> TeamController.showTeamUpdatedAction((TeamUpdated) event.payload());
             case TEAM_DELETED -> TeamController.showTeamDeletedAction((TeamDeleted) event.payload());
+            case NEW_MATCH_CREATED -> MatchController.showNewMatchCreatedAction((Match) event.payload());
+            case MATCH_FINISHED -> MatchController.showMatchFinishedAction((Match) event.payload());
+            case MATCH_CANCELED -> MatchController.showMatchCanceledAction((Match) event.payload());
         }
     }
 

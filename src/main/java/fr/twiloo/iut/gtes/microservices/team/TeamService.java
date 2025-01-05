@@ -7,12 +7,14 @@ import fr.twiloo.iut.gtes.common.model.Match;
 import fr.twiloo.iut.gtes.common.model.Team;
 import fr.twiloo.iut.gtes.common.model.dto.TeamDeleted;
 import fr.twiloo.iut.gtes.common.model.dto.TeamUpdate;
+import fr.twiloo.iut.gtes.common.model.dto.TeamUpdated;
 import fr.twiloo.iut.gtes.microservices.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 public final class TeamService extends Service {
     private final List<Team> teams = new ArrayList<>();
@@ -88,7 +90,7 @@ public final class TeamService extends Service {
             team = findTeam(payload.teamName());
         }
         if (team == null) {
-            sendEvent(new Event<>(EventType.TEAM_UPDATED, null));
+            sendEvent(new Event<>( EventType.TEAM_UPDATED, new TeamUpdated(Objects.requireNonNull(payload).teamName(), null)));
             return;
         }
 
@@ -110,7 +112,7 @@ public final class TeamService extends Service {
             team.getPlayers().addLast(payload.playerCName());
         }
 
-        sendEvent(new Event<>(EventType.TEAM_UPDATED, team));
+        sendEvent(new Event<>(EventType.TEAM_UPDATED, new TeamUpdated(payload.teamName(), team)));
     }
 
     /**

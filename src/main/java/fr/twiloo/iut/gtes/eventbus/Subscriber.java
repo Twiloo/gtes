@@ -41,20 +41,12 @@ public final class Subscriber implements Runnable {
                 event = in.readUnshared();
             } catch (IOException | ClassNotFoundException e) {
                 err.println("Error while receiving event: " + e.getMessage());
-                try {
-                    eventBus.disconnectSubscriber(this);
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
+                eventBus.disconnectSubscriber(this);
                 break;
             }
 
             if (!(event instanceof Event<?> && ((Event<?>) event).type() != null)) {
-                try {
-                    eventBus.disconnectSubscriber(this);
-                } catch (IOException e) {
-                    err.println("Error disconnecting subscriber: " + e.getMessage());
-                }
+                eventBus.disconnectSubscriber(this);
                 break;
             }
 

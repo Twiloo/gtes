@@ -3,6 +3,7 @@ package fr.twiloo.iut.gtes;
 import fr.twiloo.iut.gtes.common.Config;
 import fr.twiloo.iut.gtes.common.utils.Input;
 import fr.twiloo.iut.gtes.eventbus.EventBus;
+import fr.twiloo.iut.gtes.microservices.match.MatchService;
 import fr.twiloo.iut.gtes.microservices.team.TeamService;
 import fr.twiloo.iut.gtes.mvc.MVCApp;
 
@@ -59,8 +60,13 @@ public final class App {
                     return;
                 case 4:
                     // Lancer le Service Matchs
-                    out.println("Match service (non implémenté pour le moment).");
-                    break;
+                    MatchService matchService = new MatchService();
+                    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                        out.println("Closing MatchService...");
+                        running = false;
+                        matchService.close();
+                    }));
+                    return;
                 case 5:
                     // Lancer NotificationService
                     out.println("Notification service (non implémenté pour le moment).");

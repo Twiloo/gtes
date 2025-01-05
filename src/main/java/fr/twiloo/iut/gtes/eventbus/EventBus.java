@@ -24,7 +24,7 @@ public final class EventBus {
         subscribers.add(subscriber);
     }
 
-    public void disconnectSubscriber(Subscriber subscriber) throws IOException {
+    public void disconnectSubscriber(Subscriber subscriber) {
         out.println("Subscriber disconnected: " + subscriber);
         subscriber.closeSubscriberSafely();
         subscribers.remove(subscriber);

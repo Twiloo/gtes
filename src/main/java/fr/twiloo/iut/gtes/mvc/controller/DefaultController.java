@@ -13,18 +13,12 @@ public final class DefaultController {
     private static boolean running = true;
 
     public static void startDefaultActionAsync() {
-        Thread defaultActionThread = new Thread(() -> {
-            try {
-                defaultAction();
-            } catch (IOException e) {
-                out.println("Erreur (tout est cassé) : " + e.getMessage());
-            }
-        });
+        Thread defaultActionThread = new Thread(DefaultController::defaultAction);
         defaultActionThread.setDaemon(true); // Ensures the thread doesn’t prevent JVM shutdown
         defaultActionThread.start();
     }
 
-    public static void defaultAction() throws IOException {
+    public static void defaultAction() {
         while (running) {
             try {
                 out.println(View.DEFAULT_MENU);
@@ -47,11 +41,13 @@ public final class DefaultController {
                         TeamController.deleteTeamAction();
                         break;
                     case 5:
-                        return;
+                        MatchController.scheduleMatchAction();
+                        break;
                     case 6:
-                        return;
+                        MatchController.playMatchAction();
+                        break;
                     case 7:
-                        return;
+                        MatchController.cancelMatchAction();
                     case 8:
                         closeApplicationAction();
                         exit(0);

@@ -20,12 +20,12 @@ public final class TeamCron implements Runnable {
                 synchronized (teams) {
                     teams.sort((team1, team2) -> Integer.compare(team2.getElo(), team1.getElo()));
 
-                    for (int i = 0; i < teams.size(); i++) {
-                        teams.get(i).setRanking(i + 1);
+                    int rank = 0;
+                    for (Team team : teams) {
+                        team.setRanking(team.isActive() ? rank++ : -1);
                     }
                 }
-                Thread.sleep(5000);
-//                Thread.sleep(300000); // wait 5 minutes for next cron task
+                Thread.sleep(5000); // wait 5 seconds for next cron task
             } catch (InterruptedException ignored) { }
         }
     }

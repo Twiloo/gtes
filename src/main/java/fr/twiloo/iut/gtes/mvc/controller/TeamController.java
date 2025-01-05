@@ -5,6 +5,7 @@ import fr.twiloo.iut.gtes.common.model.Event;
 import fr.twiloo.iut.gtes.common.model.Team;
 import fr.twiloo.iut.gtes.common.model.dto.TeamDeleted;
 import fr.twiloo.iut.gtes.common.model.dto.TeamUpdate;
+import fr.twiloo.iut.gtes.common.model.dto.TeamUpdated;
 import fr.twiloo.iut.gtes.mvc.MVCApp;
 
 import java.io.IOException;
@@ -41,7 +42,6 @@ public final class TeamController {
         players.add(next());
 
         Team team = new Team(players, name, null, null, null);
-
         // Envoi de l'événement de création d'équipe
         MVCApp.getInstance().getClient().sendEvent(new Event<>(EventType.CREATE_TEAM, team));
     }
@@ -84,14 +84,14 @@ public final class TeamController {
         MVCApp.getInstance().getClient().sendEvent(event);
     }
 
-    public static void showTeamUpdatedAction(Team team) {
-        if (team == null) {
+    public static void showTeamUpdatedAction(TeamUpdated payload) {
+        if (payload.newTeam() == null) {
             out.println("L'équipe n'a pas pû être modifiée");
             return;
         }
 
-        out.println("L'équipe a été modifiée : ");
-        out.println(team);
+        out.println("L'équipe " + payload.oldTeamName() + " a été modifiée : ");
+        out.println(payload.newTeam());
     }
 
     public static void deleteTeamAction() throws IOException, InterruptedException {

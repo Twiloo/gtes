@@ -1,141 +1,135 @@
 package fr.twiloo.iut.gtes.microservices.match;
 
-import fr.twiloo.iut.gtes.common.Config;
 import fr.twiloo.iut.gtes.common.EventType;
+import fr.twiloo.iut.gtes.common.MatchStatus;
 import fr.twiloo.iut.gtes.common.model.Event;
 import fr.twiloo.iut.gtes.common.model.Match;
-import fr.twiloo.iut.gtes.common.model.Team;
-import fr.twiloo.iut.gtes.microservices.Service;
+import fr.twiloo.iut.gtes.microservices.CachedTeamsService;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public final class MatchService extends Service {
-    private final List<Team> teams = new ArrayList<>(); // Cache local pour les équipes
+public final class MatchService extends CachedTeamsService {
+    private final List<Match> matches = new ArrayList<>();
 
     public MatchService() throws IOException {
         super();
     }
 
     @Override
-    protected Config getConfig() {
-        return Config.EVENT_BUS; // Configuration pour l'EventBus
-    }
-
-    @Override
     public void dispatch(Event<?> event) {
+        super.dispatch(event);
         switch (event.type()) {
-            case NEW_MATCH_CREATED -> createMatch((Match) event.payload());
-            case MATCH_FINISHED -> finishMatch((Match) event.payload());
-            case SHOW_TEAMS_LIST -> cacheTeams(event.payload());
+            case CREATE_MATCH -> createMatch((Match) event.payload());
+            case SET_MATCH_RESULTS -> finishMatch((Match) event.payload());
+            case CANCEL_MATCH -> cancelMatch((Match) event.payload());
         }
     }
 
     @Override
     public List<EventType> supportedEventTypes() {
-        return List.of(
-                EventType.NEW_MATCH_CREATED,
-                EventType.MATCH_FINISHED,
-                EventType.SHOW_TEAMS_LIST
-        );
+        List<EventType> eventTypes = new ArrayList<>(super.supportedEventTypes());
+        eventTypes.addAll(List.of(
+                EventType.CREATE_MATCH,
+                EventType.CANCEL_MATCH,
+                EventType.SET_MATCH_RESULTS
+        ));
+        return eventTypes;
     }
 
-    /**
-     * Met en cache les équipes après un événement SHOW_TEAMS_LIST.
-     *
-     * @param payload La liste des équipes.
-     */
-    private void cacheTeams(Object payload) {
-        if (payload instanceof List<?> list) {
-            teams.clear();
-            for (Object obj : list) {
-                if (obj instanceof Team team) {
-                    teams.add(team);
+    @Override
+    protected void updateTeamNameLinkedElements(String oldTeamName, String newTeamName) {
+        synchronized (matches) {
+            for (Match match : matches) {
+                if (match.getTeamAName().equals(oldTeamName)) {
+                    match.setTeamAName(newTeamName);
+                } else if (match.getTeamBName().equals(oldTeamName)) {
+                    match.setTeamBName(newTeamName);
                 }
             }
         }
     }
 
-    /**
-     * Crée un nouveau match entre deux équipes.
-     *
-     * @param match Le match à créer.
-     */
-    private void createMatch(Match match) {
-        if (match == null || match.getTeamAName() == null || match.getTeamBName() == null) {
-            sendEvent(new Event<>(EventType.MATCH_CANCELED, null));
-            return;
+    @Override
+    protected void deleteTeamNameLinkedElements(String teamName) {
+        synchronized (matches) {
+            for (Match match : matches) {
+                if (match.getStatus() == MatchStatus.PENDING &&
+                        (match.getTeamAName().equals(teamName)) ||
+                        (match.getTeamBName().equals(teamName))) {
+                    match.setStatus(MatchStatus.CANCELLED);
+                }
+            }
         }
+    }
 
-        Team teamA = findTeam(String.valueOf(match.getTeamAName()));
-        Team teamB = findTeam(String.valueOf(match.getTeamBName()));
-
-        if (teamA == null || teamB == null) {
-            sendEvent(new Event<>(EventType.MATCH_CANCELED, null));
+    private void createMatch(Match payload) {
+        if (cannotIdentifyTeams(payload) || findPendingMatch(payload) != null) {
+            sendEvent(new Event<>(EventType.NEW_MATCH_CREATED, null));
             return;
         }
 
         // Match validé et organisé
-        sendEvent(new Event<>(EventType.CREATE_MATCH, match));
+        Match match = new Match(payload.getTeamAName(), payload.getTeamBName(), MatchStatus.PENDING, 0, 0);
+        synchronized (matches) {
+            matches.add(match);
+        }
+        sendEvent(new Event<>(EventType.NEW_MATCH_CREATED, match));
     }
 
-    /**
-     * Met à jour les scores des équipes après un match.
-     *
-     * @param match Le match terminé.
-     */
-    private void finishMatch(Match match) {
-        Team teamA = findTeam(String.valueOf(match.getTeamAName()));
-        Team teamB = findTeam(String.valueOf(match.getTeamBName()));
-
-        if (teamA == null || teamB == null) {
-            sendEvent(new Event<>(EventType.MATCH_CANCELED, null));
+    private void finishMatch(Match payload) {
+        if (cannotIdentifyTeams(payload) || findPendingMatch(payload) == null) {
+            sendEvent(new Event<>(EventType.MATCH_FINISHED, null));
             return;
         }
 
-        // Recalculer le classement
-        updateRanking();
+        Match match = findPendingMatch(payload);
+        synchronized (matches) {
+            Objects.requireNonNull(match).setStatus(MatchStatus.FINISHED);
+            if (match.getTeamAName().equals(payload.getTeamAName())) { // Put scores the way the user sent it (event if the match was created with inverted team names)
+                match.setScoreA(payload.getScoreA());
+                match.setScoreB(payload.getScoreB());
+            } else {
+                match.setScoreA(payload.getScoreB());
+                match.setScoreB(payload.getScoreA());
+            }
+        }
 
         // Envoyer un événement signalant que le match est terminé
         sendEvent(new Event<>(EventType.MATCH_FINISHED, match));
     }
 
-    /**
-     * Met à jour l'Elo d'une équipe après un match.
-     *
-     * @param team    L'équipe à mettre à jour.
-     * @param score   Le score de l'équipe.
-     * @param opponentScore Le score de l'équipe adverse.
-     */
-    private void updateTeamElo(Team team, int score, int opponentScore) {
-        // Exemple simple : victoire = +10 Elo, défaite = -10 Elo
-        int eloChange = score > opponentScore ? 10 : (score < opponentScore ? -10 : 0);
-        team.setElo(team.getElo() + eloChange);
+    private void cancelMatch(Match payload) {
+        if (cannotIdentifyTeams(payload) || findPendingMatch(payload) == null) {
+            sendEvent(new Event<>(EventType.MATCH_CANCELED, null));
+            return;
+        }
 
-        // Envoyer une mise à jour de l'équipe au TeamService
-        sendEvent(new Event<>(EventType.TEAM_UPDATED, team));
+        Match match = findPendingMatch(payload);
+        synchronized (matches) {
+            Objects.requireNonNull(match).setStatus(MatchStatus.CANCELLED);
+        }
+        sendEvent(new Event<>(EventType.MATCH_CANCELED, match));
     }
 
-    /**
-     * Met à jour le classement des équipes.
-     */
-    private void updateRanking() {
-        // Trier les équipes par Elo (descendant) et envoyer un événement de mise à jour
-        teams.sort((t1, t2) -> Integer.compare(t2.getElo(), t1.getElo()));
-        sendEvent(new Event<>(EventType.RANKING_UPDATED, teams));
+    private boolean cannotIdentifyTeams(Match match) {
+        return match == null ||
+                match.getTeamAName() == null ||
+                match.getTeamBName() == null ||
+                !teamExist(match.getTeamAName()) ||
+                !teamExist(match.getTeamBName());
     }
 
-    /**
-     * Recherche une équipe par son nom dans le cache local.
-     *
-     * @param name Le nom de l'équipe.
-     * @return L'équipe correspondante, ou null si elle n'existe pas.
-     */
-    private Team findTeam(String name) {
-        for (Team team : teams) {
-            if (team.getName().equalsIgnoreCase(name)) {
-                return team;
+    private Match findPendingMatch(Match payload) {
+        for (Match match : matches.stream().filter(match -> match.getStatus() == MatchStatus.PENDING).toList()) {
+            if (match.getTeamAName().equals(payload.getTeamAName())
+            && match.getTeamBName().equals(payload.getTeamBName())) {
+                return match;
+            } else if (match.getTeamAName().equals(payload.getTeamBName())
+                    && match.getTeamBName().equals(payload.getTeamAName())) {
+                return match;
             }
         }
         return null;

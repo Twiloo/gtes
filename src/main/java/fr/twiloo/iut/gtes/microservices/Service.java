@@ -27,11 +27,7 @@ public abstract class Service implements EventDispatcher {
     }
 
     public void close() {
-        try {
-            client.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        client.close();
     }
 
     abstract protected Config getConfig();

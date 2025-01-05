@@ -53,7 +53,7 @@ public final class Client implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         try {
             // Interrompre le thread de réception
             clientReceive.stop();
