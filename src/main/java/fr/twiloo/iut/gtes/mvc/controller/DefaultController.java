@@ -44,7 +44,8 @@ public final class DefaultController {
                         TeamController.updateTeamAction();
                         break;
                     case 4:
-                        return;
+                        TeamController.deleteTeamAction();
+                        break;
                     case 5:
                         return;
                     case 6:

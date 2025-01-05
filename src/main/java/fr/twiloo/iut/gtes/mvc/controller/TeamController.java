@@ -3,6 +3,7 @@ package fr.twiloo.iut.gtes.mvc.controller;
 import fr.twiloo.iut.gtes.common.EventType;
 import fr.twiloo.iut.gtes.common.model.Event;
 import fr.twiloo.iut.gtes.common.model.Team;
+import fr.twiloo.iut.gtes.common.model.dto.TeamDeleted;
 import fr.twiloo.iut.gtes.common.model.dto.TeamUpdate;
 import fr.twiloo.iut.gtes.mvc.MVCApp;
 
@@ -91,5 +92,25 @@ public final class TeamController {
 
         out.println("L'équipe a été modifiée : ");
         out.println(team);
+    }
+
+    public static void deleteTeamAction() throws IOException, InterruptedException {
+        out.println("Entrez le nom de l'équipe à supprimer : ");
+        String name = next();
+
+        Event<String> event = new Event<>(EventType.DELETE_TEAM, name);
+
+        out.println(event);
+
+        // Envoi de l'événement de modification de l'équipe
+        MVCApp.getInstance().getClient().sendEvent(event);
+    }
+
+    public static void showTeamDeletedAction(TeamDeleted payload) {
+        if (payload.success()) {
+            out.println("L'équipe " + payload.teamName() + " a bien été supprimée");
+        } else {
+            out.println("L'équipe " + payload.teamName() + " n'a pas pû être supprimée");
+        }
     }
 }

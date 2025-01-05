@@ -6,6 +6,7 @@ import fr.twiloo.iut.gtes.common.client.Client;
 import fr.twiloo.iut.gtes.common.client.EventDispatcher;
 import fr.twiloo.iut.gtes.common.model.Event;
 import fr.twiloo.iut.gtes.common.model.Team;
+import fr.twiloo.iut.gtes.common.model.dto.TeamDeleted;
 import fr.twiloo.iut.gtes.mvc.controller.DefaultController;
 import fr.twiloo.iut.gtes.mvc.controller.TeamController;
 
@@ -38,6 +39,7 @@ public final class MVCApp implements EventDispatcher {
             case SHOW_TEAMS_LIST -> TeamController.showTeamsListAction((List<?>)  event.payload());
             case NEW_TEAM_CREATED -> TeamController.showNewTeamCreatedAction((Team) event.payload());
             case TEAM_UPDATED -> TeamController.showTeamUpdatedAction((Team) event.payload());
+            case TEAM_DELETED -> TeamController.showTeamDeletedAction((TeamDeleted) event.payload());
         }
     }
 

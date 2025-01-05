@@ -5,6 +5,7 @@ import fr.twiloo.iut.gtes.common.EventType;
 import fr.twiloo.iut.gtes.common.model.Event;
 import fr.twiloo.iut.gtes.common.model.Match;
 import fr.twiloo.iut.gtes.common.model.Team;
+import fr.twiloo.iut.gtes.common.model.dto.TeamDeleted;
 import fr.twiloo.iut.gtes.common.model.dto.TeamUpdate;
 import fr.twiloo.iut.gtes.microservices.Service;
 
@@ -119,7 +120,7 @@ public final class TeamService extends Service {
         Team team = findTeam(payload);
         if (team != null)
             team.deactivate();
-        sendEvent(new Event<>(EventType.TEAM_DELETED, team != null));
+        sendEvent(new Event<>(EventType.TEAM_DELETED, new TeamDeleted(payload, team != null)));
     }
 
     private void updateRanking(Match match) {
