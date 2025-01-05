@@ -13,8 +13,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import static java.lang.System.out;
-
 public final class TeamService extends Service {
     private final List<Team> teams = new ArrayList<>();
     private final TeamCron teamCron;
@@ -87,7 +85,6 @@ public final class TeamService extends Service {
         Team team = null;
         if (payload != null && payload.teamName() != null) {
             team = findTeam(payload.teamName());
-            out.println("found team " + team.getName() + " for " + payload.teamName());
         }
         if (team == null) {
             sendEvent(new Event<>(EventType.TEAM_UPDATED, null));
@@ -104,12 +101,12 @@ public final class TeamService extends Service {
 
         if (payload.playerBName() != null && !payload.playerBName().isEmpty()) {
             team.getPlayers().remove(1);
-            team.getPlayers().add(1, payload.playerAName());
+            team.getPlayers().add(1, payload.playerBName());
         }
 
         if (payload.playerCName() != null && !payload.playerCName().isEmpty()) {
             team.getPlayers().removeLast();
-            team.getPlayers().addLast(payload.playerAName());
+            team.getPlayers().addLast(payload.playerCName());
         }
 
         sendEvent(new Event<>(EventType.TEAM_UPDATED, team));

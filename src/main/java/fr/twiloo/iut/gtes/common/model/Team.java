@@ -1,11 +1,11 @@
 package fr.twiloo.iut.gtes.common.model;
 
-import java.io.Serializable;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Objects;
 
 public final class Team implements Serializable {
-    private final ArrayList<String> players;
+    private ArrayList<String> players;
     private String name;
     private Integer elo;
     private Integer ranking;
@@ -77,4 +77,16 @@ public final class Team implements Serializable {
         return "Équipe " + name + " : " + players + "; Classement : " + ranking + "; Elo : " + elo + "; Actif : " + active;
     }
 
+
+    @Serial
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+        out.writeUnshared(players);
+    }
+
+    @Serial
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        players = (ArrayList<String>) in.readUnshared();
+    }
 }
