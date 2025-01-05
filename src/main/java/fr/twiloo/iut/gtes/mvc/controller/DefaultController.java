@@ -48,6 +48,7 @@ public final class DefaultController {
                         break;
                     case 7:
                         MatchController.cancelMatchAction();
+                        break;
                     case 8:
                         closeApplicationAction();
                         exit(0);
