@@ -22,7 +22,7 @@ public final class ClientReceive implements Runnable, Closeable {
             while (running) {
                 Object event;
                 try {
-                    event = in.readObject();
+                    event = in.readUnshared();
                 } catch (ClassNotFoundException e) {
                     System.err.println("Événement non reconnu : " + e.getMessage());
                     continue; // Ignorer cet événement et poursuivre l'écoute

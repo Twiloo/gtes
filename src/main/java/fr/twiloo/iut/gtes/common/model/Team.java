@@ -1,10 +1,11 @@
 package fr.twiloo.iut.gtes.common.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public final class Team {
-    private ArrayList<String> players;
+public final class Team implements Serializable {
+    private final ArrayList<String> players;
     private String name;
     private Integer elo;
     private Integer ranking;
@@ -20,10 +21,6 @@ public final class Team {
 
     public ArrayList<String> getPlayers() {
         return players;
-    }
-
-    public void setPlayers(ArrayList<String> players) {
-        this.players = players;
     }
 
     public String getName() {

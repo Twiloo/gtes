@@ -10,7 +10,8 @@ public enum View {
             4 : Supprimer une équipe ;
             5 : Organiser un match ;
             6 : Jouer un match ;
-            7 : Annuler un match.
+            7 : Annuler un match ;
+            8 : Arrêter l'application.
            """);
 
     private final String content;

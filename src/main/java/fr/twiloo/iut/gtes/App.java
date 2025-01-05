@@ -1,20 +1,22 @@
 package fr.twiloo.iut.gtes;
 
 import fr.twiloo.iut.gtes.common.Config;
+import fr.twiloo.iut.gtes.common.utils.Input;
 import fr.twiloo.iut.gtes.eventbus.EventBus;
 import fr.twiloo.iut.gtes.microservices.team.TeamService;
 import fr.twiloo.iut.gtes.mvc.MVCApp;
 
 import java.io.IOException;
-import java.util.Scanner;
 
+import static fr.twiloo.iut.gtes.common.utils.Input.next;
 import static java.lang.System.out;
 
 public final class App {
-    public final static Scanner sc = new Scanner(System.in);
     private static boolean running = true;
 
     public static void main(String[] args) throws IOException {
+        Input.start();
+
         while (running) {
             out.println("""
                     Quelle application/service démarrer ?
@@ -26,13 +28,10 @@ public final class App {
                      5 : Service Notifications ;
                      6 : Quitter.
                     """);
-            int option;
+            int option = -1;
             try {
-                option = sc.nextInt();
-            } catch (Exception e) {
-                sc.nextLine();
-                continue;
-            }
+                option = Integer.parseInt(next());
+            } catch (Exception ignored) { }
             switch (option) {
                 case 1:
                     MVCApp.getInstance();
@@ -69,6 +68,7 @@ public final class App {
                 case 6:
                     out.println("Exiting...");
                     running = false;
+                    Input.stop();
                     break;
                 default:
                     out.println("Option invalide. Essayez de nouveau.");

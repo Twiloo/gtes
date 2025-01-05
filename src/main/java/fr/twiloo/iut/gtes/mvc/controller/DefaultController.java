@@ -1,13 +1,13 @@
 package fr.twiloo.iut.gtes.mvc.controller;
 
-import fr.twiloo.iut.gtes.App;
 import fr.twiloo.iut.gtes.mvc.MVCApp;
 import fr.twiloo.iut.gtes.mvc.view.View;
 
 import java.io.IOException;
 
-import static java.lang.System.exit;
-import static java.lang.System.out;
+import static fr.twiloo.iut.gtes.common.utils.Input.next;
+import static fr.twiloo.iut.gtes.common.utils.Input.stop;
+import static java.lang.System.*;
 
 public final class DefaultController {
     private static boolean running = true;
@@ -26,54 +26,41 @@ public final class DefaultController {
 
     public static void defaultAction() throws IOException {
         while (running) {
-            out.println(View.DEFAULT_MENU);
-            int option;
             try {
-                option = App.sc.nextInt();
-            } catch (Exception e) {
-                if (!running)
-                    return;
-                App.sc.nextLine();
-                continue;
-            }
-            switch (option) {
-                case 1:
-                    try {
-                        TeamController.getTeamListAction();
-                    } catch (IOException e) {
-                        out.println("Une erreur s'est produite lors de l'affichage de la liste des équipes : " + e.getMessage());
-                    }
-                    break;
-                case 2:
-                    TeamController.addTeamAction();
-                    break;
-                case 3:
-                    // Modifier une équipe
-                    return;
-                case 4:
-                    // Supprimer une équipe
-                    return;
-                case 5:
-                    // Organiser un match
-                    return;
-                case 6:
-                    // Jouer un match
-                    return;
-                case 7:
-                    // Annuler un match
-                    return;
-                case 8:
-                    // Arrêter l'application
-                    closeApplicationAction();
-                    exit(0);
-            }
-            App.sc.nextLine();
-            out.println();
-            try {
-                Thread.sleep(1000);
+                out.println(View.DEFAULT_MENU);
+                int option = Integer.parseInt(next());
+                switch (option) {
+                    case 1:
+                        try {
+                            TeamController.getTeamListAction();
+                        } catch (IOException e) {
+                            out.println("Une erreur s'est produite lors de l'affichage de la liste des équipes : " + e.getMessage());
+                        }
+                        break;
+                    case 2:
+                        TeamController.addTeamAction();
+                        break;
+                    case 3:
+                        TeamController.updateTeamAction();
+                        break;
+                    case 4:
+                        return;
+                    case 5:
+                        return;
+                    case 6:
+                        return;
+                    case 7:
+                        return;
+                    case 8:
+                        closeApplicationAction();
+                        exit(0);
+                    default:
+                        err.println(option + " n'est pas valide");
+                }
                 out.println();
-            } catch (InterruptedException e) {
-                closeApplicationAction();
+                Thread.sleep(1000);
+            } catch (Exception e) {
+                err.println("La saisie n'est pas valide");
             }
         }
     }
@@ -90,7 +77,7 @@ public final class DefaultController {
                 MVCApp.getInstance().getClient().close();
             } catch (IOException ignored) { }
             finally {
-                App.sc.close();
+                stop();
             }
         }
     }

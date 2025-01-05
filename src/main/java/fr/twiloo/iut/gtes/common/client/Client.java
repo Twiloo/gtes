@@ -9,6 +9,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+import static java.lang.System.err;
+
 public final class Client implements Closeable {
     private final Socket socket;
     private final ObjectOutputStream out;
@@ -22,7 +24,7 @@ public final class Client implements Closeable {
             out = new ObjectOutputStream(socket.getOutputStream());
 
             // Envoi des types d'événements pris en charge
-            out.writeObject(eventDispatcher.supportedEventTypes());
+            out.writeUnshared(eventDispatcher.supportedEventTypes());
             out.flush();
 
             // Initialiser le thread de réception pour gérer les événements asynchrones
@@ -43,7 +45,7 @@ public final class Client implements Closeable {
         }
 
         try {
-            out.writeObject(event);
+            out.writeUnshared(event);
             out.flush();
         } catch (IOException e) {
             throw new RuntimeException("Échec de l'envoi de l'événement : " + event, e);
@@ -64,14 +66,14 @@ public final class Client implements Closeable {
                 socket.close();
             }
         } catch (IOException e) {
-            System.err.println("Erreur lors de la fermeture du socket : " + e.getMessage());
+            err.println("Erreur lors de la fermeture du socket : " + e.getMessage());
         }
 
         try {
             // Fermer le flux de sortie
             out.close();
         } catch (IOException e) {
-            System.err.println("Erreur lors de la fermeture du flux de sortie : " + e.getMessage());
+            err.println("Erreur lors de la fermeture du flux de sortie : " + e.getMessage());
         }
     }
 }

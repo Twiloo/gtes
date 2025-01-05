@@ -10,6 +10,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.System.err;
+
 public final class Subscriber implements Runnable {
     private final ArrayList<EventType> subscribedEvents = new ArrayList<>();
     private final EventBus eventBus;
@@ -36,9 +38,9 @@ public final class Subscriber implements Runnable {
         while (!socket.isClosed()) {
             Object event;
             try {
-                event = in.readObject();
+                event = in.readUnshared();
             } catch (IOException | ClassNotFoundException e) {
-                System.err.println("Error while receiving event: " + e.getMessage());
+                err.println("Error while receiving event: " + e.getMessage());
                 try {
                     eventBus.disconnectSubscriber(this);
                 } catch (IOException ex) {
@@ -51,7 +53,7 @@ public final class Subscriber implements Runnable {
                 try {
                     eventBus.disconnectSubscriber(this);
                 } catch (IOException e) {
-                    System.err.println("Error disconnecting subscriber: " + e.getMessage());
+                    err.println("Error disconnecting subscriber: " + e.getMessage());
                 }
                 break;
             }
@@ -59,14 +61,14 @@ public final class Subscriber implements Runnable {
             try {
                 eventBus.dispatch((Event<?>) event);
             } catch (IOException e) {
-                System.err.println("Error dispatching event: " + e.getMessage());
+                err.println("Error dispatching event: " + e.getMessage());
             }
         }
     }
 
     private void makeSubscription() {
         try {
-            Object subscription = in.readObject();
+            Object subscription = in.readUnshared();
             if (subscription instanceof List<?> && !((List<?>) subscription).isEmpty()) {
                 for (Object eventType : (List<?>) subscription) {
                     if (eventType instanceof EventType) {
@@ -75,7 +77,7 @@ public final class Subscriber implements Runnable {
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error during subscription: " + e.getMessage());
+            err.println("Error during subscription: " + e.getMessage());
         }
         System.out.println("New subscription: " + this);
     }
@@ -93,19 +95,13 @@ public final class Subscriber implements Runnable {
             if (!socket.isClosed())
                 socket.close();
         } catch (IOException e) {
-            System.err.println("Error closing socket: " + e.getMessage());
-        }
-        try {
-            if (in != null)
-                in.close();
-        } catch (IOException e) {
-            System.err.println("Error closing input stream: " + e.getMessage());
+            err.println("Error closing socket: " + e.getMessage());
         }
         try {
             if (out != null)
                 out.close();
         } catch (IOException e) {
-            System.err.println("Error closing output stream: " + e.getMessage());
+            err.println("Error closing output stream: " + e.getMessage());
         }
     }
 

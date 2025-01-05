@@ -5,26 +5,22 @@ import fr.twiloo.iut.gtes.common.EventType;
 import fr.twiloo.iut.gtes.common.client.Client;
 import fr.twiloo.iut.gtes.common.client.EventDispatcher;
 import fr.twiloo.iut.gtes.common.model.Event;
+import fr.twiloo.iut.gtes.common.model.Team;
 import fr.twiloo.iut.gtes.mvc.controller.DefaultController;
 import fr.twiloo.iut.gtes.mvc.controller.TeamController;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 public final class MVCApp implements EventDispatcher {
-    private static final AtomicReference<MVCApp> instance = new AtomicReference<>();
+    private static MVCApp instance;
     private final Client client;
 
     public static MVCApp getInstance() throws IOException {
-        if (instance.get() == null) {  // First check (no synchronization)
-            synchronized (MVCApp.class) {
-                if (instance.get() == null) {  // Second check (with synchronization)
-                    instance.set(new MVCApp());
-                }
-            }
+        if (instance == null) {
+            instance = new MVCApp();
         }
-        return instance.get();
+        return instance;
     }
 
     private MVCApp() throws IOException {
@@ -40,6 +36,8 @@ public final class MVCApp implements EventDispatcher {
     public void dispatch(Event<?> event) {
         switch (event.type()) {
             case SHOW_TEAMS_LIST -> TeamController.showTeamsListAction((List<?>)  event.payload());
+            case NEW_TEAM_CREATED -> TeamController.showNewTeamCreatedAction((Team) event.payload());
+            case TEAM_UPDATED -> TeamController.showTeamUpdatedAction((Team) event.payload());
         }
     }
 

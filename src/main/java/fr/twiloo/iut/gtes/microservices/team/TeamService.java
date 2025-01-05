@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import static java.lang.System.out;
+
 public final class TeamService extends Service {
     private final List<Team> teams = new ArrayList<>();
     private final TeamCron teamCron;
@@ -83,19 +85,32 @@ public final class TeamService extends Service {
 
     private void updateTeam(TeamUpdate payload) {
         Team team = null;
-        if (payload != null && payload.value() != null)
-            team = findTeam(payload.key());
+        if (payload != null && payload.teamName() != null) {
+            team = findTeam(payload.teamName());
+            out.println("found team " + team.getName() + " for " + payload.teamName());
+        }
         if (team == null) {
             sendEvent(new Event<>(EventType.TEAM_UPDATED, null));
             return;
         }
 
-        Team newTeam = payload.value();
-        if (newTeam.getName() != null && !newTeam.getName().isEmpty() && findTeam(newTeam.getName()) == null)
-            team.setName(newTeam.getName());
+        if (payload.newName() != null && !payload.newName().isEmpty() && findTeam(payload.newName()) == null)
+            team.setName(payload.newName());
 
-        if (newTeam.getPlayers() != null && newTeam.getPlayers().size() == 3)
-            team.setPlayers(newTeam.getPlayers());
+        if (payload.playerAName() != null && !payload.playerAName().isEmpty()) {
+            team.getPlayers().removeFirst();
+            team.getPlayers().addFirst(payload.playerAName());
+        }
+
+        if (payload.playerBName() != null && !payload.playerBName().isEmpty()) {
+            team.getPlayers().remove(1);
+            team.getPlayers().add(1, payload.playerAName());
+        }
+
+        if (payload.playerCName() != null && !payload.playerCName().isEmpty()) {
+            team.getPlayers().removeLast();
+            team.getPlayers().addLast(payload.playerAName());
+        }
 
         sendEvent(new Event<>(EventType.TEAM_UPDATED, team));
     }

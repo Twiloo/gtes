@@ -1,8 +1,11 @@
 package fr.twiloo.iut.gtes.common.model.dto;
 
-import fr.twiloo.iut.gtes.common.model.Team;
+import java.io.Serializable;
 
 public record TeamUpdate(
-        String key,
-        Team value) {
+        String teamName,
+        String newName,
+        String playerAName,
+        String playerBName,
+        String playerCName) implements Serializable {
 }
