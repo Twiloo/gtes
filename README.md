@@ -35,7 +35,7 @@ Le projet contient plusieurs packages ayant les rôles suivants :
 ## Pistes d'améliorations
 
 Dans une réelle architecture microservices, les services ne doivent pas être responsables du stockage des données (équipes, matchs).
-Il faudrait relier une base de donnée par (type de) service pour s'assurer qu'en cas de redémarrage d'un service, les données sont toujours présentes.
+Il faudrait relier une base de données par (type de) service pour s'assurer qu'en cas de redémarrage d'un service, les données sont toujours présentes.
 
 Si l'on souhaite améliorer la scalabilité et avoir des services Stateless (plusieurs services équipes accueillent les demandes des utilisateurs en parallèle, mais un seul doit recevoir l'évènement), il faudrait également que le bus fasse office de reverse proxy et redirige l'évènement à un seul des services du même type (aléatoirement) ; voir recommence avec les autres en cas d'échec.
 
