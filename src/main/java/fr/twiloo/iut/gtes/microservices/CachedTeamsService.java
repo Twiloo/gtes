@@ -1,6 +1,5 @@
 package fr.twiloo.iut.gtes.microservices;
 
-import fr.twiloo.iut.gtes.common.Config;
 import fr.twiloo.iut.gtes.common.EventType;
 import fr.twiloo.iut.gtes.common.model.Event;
 import fr.twiloo.iut.gtes.common.model.Team;
@@ -15,11 +14,6 @@ public abstract class CachedTeamsService extends Service {
 
     public CachedTeamsService() throws IOException {
         super();
-    }
-
-    @Override
-    protected Config getConfig() {
-        return Config.EVENT_BUS; // Configuration pour l'EventBus
     }
 
     @Override
@@ -72,6 +66,7 @@ public abstract class CachedTeamsService extends Service {
 
     abstract protected void deleteTeamNameLinkedElements(String teamName);
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted") // This method shouldn't add the negation !
     protected boolean teamExist(String name) {
         synchronized (teams) {
             return teams.contains(name);

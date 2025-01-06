@@ -4,6 +4,7 @@ import fr.twiloo.iut.gtes.common.EventType;
 import fr.twiloo.iut.gtes.common.model.Event;
 import fr.twiloo.iut.gtes.common.model.Match;
 import fr.twiloo.iut.gtes.mvc.MVCApp;
+import fr.twiloo.iut.gtes.mvc.view.View;
 
 import java.io.IOException;
 
@@ -14,9 +15,9 @@ public final class MatchController {
 
     public static void scheduleMatchAction() throws InterruptedException, IOException {
         // Collecte des informations pour le match
-        out.println("Entrez le nom de la première équipe : ");
+        out.println(View.ASK_TEAM_A_NAME);
         String teamAName = next();
-        out.println("Entrez le nom de la deuxième équipe : ");
+        out.println(View.ASK_TEAM_B_NAME);
         String teamBName = next();
 
         Match match = new Match(teamAName, teamBName, null, 0, 0);
@@ -26,22 +27,22 @@ public final class MatchController {
 
     public static void showNewMatchCreatedAction(Match match) {
         if (match == null) {
-            out.println("Le match n'a pas pû être créé");
+            out.println(View.MATCH_NON_CREE);
             return;
         }
 
-        out.println("Le match a été créé : ");
+        out.println(View.MATCH_CREE);
         out.println(match);
     }
 
     public static void playMatchAction() throws InterruptedException, IOException {
-        out.println("Entrez le nom de la première équipe : ");
+        out.println(View.ASK_TEAM_A_NAME);
         String teamAName = next();
-        out.println("Entrez le nom de la deuxième équipe : ");
+        out.println(View.ASK_TEAM_B_NAME);
         String teamBName = next();
-        out.println("Entrez le score de la première équipe : ");
+        out.println(View.ASK_TEAM_A_SCORE);
         int teamAScore = Integer.parseInt(next());
-        out.println("Entrez le score de la deuxième équipe : ");
+        out.println(View.ASK_TEAM_B_SCORE);
         int teamBScore = Integer.parseInt(next());
 
         Match match = new Match(teamAName, teamBName, null, teamAScore, teamBScore);
@@ -51,17 +52,17 @@ public final class MatchController {
 
     public static void showMatchFinishedAction(Match match) {
         if (match == null) {
-            out.println("Les résultats du match n'ont pas pû être enregistrés");
+            out.println(View.MATCH_NON_FINI);
             return;
         }
-        out.println("Le match est terminé");
+        out.println(View.MATCH_FINI);
         out.println(match);
     }
 
     public static void cancelMatchAction() throws InterruptedException, IOException {
-        out.println("Entrez le nom de la première équipe : ");
+        out.println(View.ASK_TEAM_A_NAME);
         String teamAName = next();
-        out.println("Entrez le nom de la deuxième équipe : ");
+        out.println(View.ASK_TEAM_B_NAME);
         String teamBName = next();
 
         Match match = new Match(teamAName, teamBName, null, 0, 0);
@@ -71,10 +72,10 @@ public final class MatchController {
 
     public static void showMatchCanceledAction(Match match) {
         if (match == null) {
-            out.println("Le match n'a pas pû être annulé");
+            out.println(View.MATCH_NON_ANNULE);
             return;
         }
-        out.println("Le match est annulé");
+        out.println(View.MATCH_ANNULE);
         out.println(match);
     }
 }

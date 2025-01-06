@@ -1,9 +1,9 @@
 package fr.twiloo.iut.gtes.microservices.notification;
 
-import fr.twiloo.iut.gtes.common.Config;
 import fr.twiloo.iut.gtes.common.EventType;
 import fr.twiloo.iut.gtes.common.model.Event;
 import fr.twiloo.iut.gtes.common.model.Match;
+import fr.twiloo.iut.gtes.common.model.Team;
 import fr.twiloo.iut.gtes.microservices.Service;
 
 import java.io.IOException;
@@ -16,16 +16,11 @@ public final class NotificationService extends Service {
     }
 
     @Override
-    protected Config getConfig() {
-        return Config.EVENT_BUS;
-    }
-
-    @Override
     public void dispatch(Event<?> event) {
         switch (event.type()) {
             case NEW_MATCH_CREATED -> sendMatchCreatedNotification((Match) event.payload());
             case MATCH_FINISHED -> sendMatchFinishedNotification((Match) event.payload());
-            case RANKING_UPDATED -> sendRankingUpdatedNotification();
+            case RANKING_UPDATED -> sendRankingUpdatedNotification((Team) event.payload());
         }
     }
 
@@ -53,7 +48,11 @@ public final class NotificationService extends Service {
         }
     }
 
-    private void sendRankingUpdatedNotification() {
-        System.out.println("Notification: Le classement des équipes a été mis à jour !");
+    private void sendRankingUpdatedNotification(Team team) {
+        if (team == null) {
+            return;
+        }
+        System.out.println("Notification: Le classement de l'équipe " + team.getName() + " a été mis à jour !\n" +
+                "Nouvelle position : " + team.getRanking());
     }
 }

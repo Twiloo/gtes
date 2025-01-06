@@ -23,14 +23,9 @@ public final class TeamService extends Service {
 
     public TeamService() throws IOException {
         super();
-        teamCron = new TeamCron(teams);
+        teamCron = new TeamCron(teams, this.client);
         cronThread = new Thread(teamCron);
         cronThread.start();
-    }
-
-    @Override
-    protected Config getConfig() {
-        return Config.EVENT_BUS;
     }
 
     @Override
@@ -60,18 +55,18 @@ public final class TeamService extends Service {
                 payload.getPlayers() == null || payload.getPlayers().size() != 3 ||
                 findTeam(payload.getName()) != null) {
             // Équipe invalide ou déjà existante
-            sendEvent(new Event<>(EventType.NEW_TEAM_CREATED, null));
+            sendEvent(new Event<>(EventType.NEW_TEAM_CREATED, null), true);
             return;
         }
 
         // Création de l'équipe avec des valeurs par défaut
-        Team team = new Team(payload.getPlayers(), payload.getName(), 500, -1, true);
+        Team team = new Team(payload.getPlayers(), payload.getName(), (Integer) Config.BASE_ELO.value, -1, true);
         synchronized (teams) {
             teams.add(team);
         }
 
         // Notification de la création de l'équipe
-        sendEvent(new Event<>(EventType.NEW_TEAM_CREATED, team));
+        sendEvent(new Event<>(EventType.NEW_TEAM_CREATED, team), true);
     }
 
     private void listTeams() {
@@ -80,7 +75,7 @@ public final class TeamService extends Service {
                     .filter(Team::isActive)
                     .sorted(Comparator.comparing(Team::getRanking))
                     .toList();
-            sendEvent(new Event<>(EventType.SHOW_TEAMS_LIST, orderedTeams));
+            sendEvent(new Event<>(EventType.SHOW_TEAMS_LIST, orderedTeams), true);
         }
     }
 
@@ -90,7 +85,7 @@ public final class TeamService extends Service {
             team = findTeam(payload.teamName());
         }
         if (team == null) {
-            sendEvent(new Event<>( EventType.TEAM_UPDATED, new TeamUpdated(Objects.requireNonNull(payload).teamName(), null)));
+            sendEvent(new Event<>( EventType.TEAM_UPDATED, new TeamUpdated(Objects.requireNonNull(payload).teamName(), null)), true);
             return;
         }
 
@@ -112,7 +107,7 @@ public final class TeamService extends Service {
             team.getPlayers().addLast(payload.playerCName());
         }
 
-        sendEvent(new Event<>(EventType.TEAM_UPDATED, new TeamUpdated(payload.teamName(), team)));
+        sendEvent(new Event<>(EventType.TEAM_UPDATED, new TeamUpdated(payload.teamName(), team)), true);
     }
 
     /**
@@ -122,11 +117,38 @@ public final class TeamService extends Service {
         Team team = findTeam(payload);
         if (team != null)
             team.deactivate();
-        sendEvent(new Event<>(EventType.TEAM_DELETED, new TeamDeleted(payload, team != null)));
+        sendEvent(new Event<>(EventType.TEAM_DELETED, new TeamDeleted(payload, team != null)), true);
     }
 
     private void updateRanking(Match match) {
-        // Mise à jour des classements en fonction des résultats du match
+        if (match == null ||
+                match.getTeamAName() == null ||
+                match.getTeamBName() == null ||
+                findTeam(match.getTeamAName()) == null ||
+                findTeam(match.getTeamBName()) == null) {
+            return;
+        }
+        // Mise à jour du score elo en fonction des résultats du match
+        synchronized (teams) {
+            Team teamA = findTeam(match.getTeamAName());
+            Team teamB = findTeam(match.getTeamBName());
+
+            int eloA = teamA.getElo();
+            int eloB = teamB.getElo();
+            int K = 30;
+
+            double expectedA = 1.0 / (1.0 + Math.pow(10, (eloB - eloA) / (Double) Config.ELO_DIFFERENCE_FACTOR.value));
+            double expectedB = 1.0 / (1.0 + Math.pow(10, (eloA - eloB) / (Double) Config.ELO_DIFFERENCE_FACTOR.value));
+
+            double actualA = match.getScoreA() > match.getScoreB() ? 1 : (match.getScoreA() == match.getScoreB() ? 0.5 : 0);
+            double actualB = match.getScoreB() > match.getScoreA() ? 1 : (match.getScoreA() == match.getScoreB() ? 0.5 : 0);
+
+            int newEloA = (int) (eloA + K * (actualA - expectedA));
+            int newEloB = (int) (eloB + K * (actualB - expectedB));
+
+            teamA.setElo(newEloA);
+            teamB.setElo(newEloB);
+        }
     }
 
     private Team findTeam(String name) {

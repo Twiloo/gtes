@@ -18,6 +18,7 @@ public final class DefaultController {
         defaultActionThread.start();
     }
 
+    @SuppressWarnings("BusyWait")
     public static void defaultAction() {
         while (running) {
             try {
@@ -58,13 +59,13 @@ public final class DefaultController {
                 out.println();
                 Thread.sleep(1000);
             } catch (Exception e) {
-                err.println("La saisie n'est pas valide");
+                err.println(View.SAISIE_INVALIDE);
             }
         }
     }
 
     public static void closeApplicationAction() {
-        out.println("Closing application...");
+        out.println(View.FERMETURE);
         running = false;
         try {
             Thread.sleep(1000);

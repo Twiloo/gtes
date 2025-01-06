@@ -1,6 +1,5 @@
 package fr.twiloo.iut.gtes.mvc;
 
-import fr.twiloo.iut.gtes.common.Config;
 import fr.twiloo.iut.gtes.common.EventType;
 import fr.twiloo.iut.gtes.common.client.Client;
 import fr.twiloo.iut.gtes.common.client.EventDispatcher;
@@ -28,7 +27,7 @@ public final class MVCApp implements EventDispatcher {
     }
 
     private MVCApp() throws IOException {
-        client = new Client(Config.EVENT_BUS, this);
+        client = new Client(this);
         DefaultController.startDefaultActionAsync();
     }
 

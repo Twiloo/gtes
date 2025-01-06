@@ -17,10 +17,10 @@ public final class Client implements Closeable {
     private final Thread clientReceiveThread;
     private final ClientReceive clientReceive;
 
-    public Client(Config config, EventDispatcher eventDispatcher) throws IOException {
+    public Client(EventDispatcher eventDispatcher) throws IOException {
         // Établir la connexion au Bus d'Événements
         try {
-            socket = new Socket("127.0.0.1", config.port);
+            socket = new Socket((String) Config.EVENT_BUS_IP.value, (Integer) Config.EVENT_BUS_PORT.value);
             out = new ObjectOutputStream(socket.getOutputStream());
 
             // Envoi des types d'événements pris en charge
@@ -39,7 +39,7 @@ public final class Client implements Closeable {
         }
     }
 
-    public void sendEvent(Event<?> event) {
+    public void sendEvent(Event<?> event) throws RuntimeException {
         if (event == null || event.type() == null) {
             throw new IllegalArgumentException("L'événement ou son type ne peut pas être nul.");
         }

@@ -67,7 +67,7 @@ public final class MatchService extends CachedTeamsService {
 
     private void createMatch(Match payload) {
         if (cannotIdentifyTeams(payload) || findPendingMatch(payload) != null) {
-            sendEvent(new Event<>(EventType.NEW_MATCH_CREATED, null));
+            sendEvent(new Event<>(EventType.NEW_MATCH_CREATED, null), true);
             return;
         }
 
@@ -76,12 +76,12 @@ public final class MatchService extends CachedTeamsService {
         synchronized (matches) {
             matches.add(match);
         }
-        sendEvent(new Event<>(EventType.NEW_MATCH_CREATED, match));
+        sendEvent(new Event<>(EventType.NEW_MATCH_CREATED, match), true);
     }
 
     private void finishMatch(Match payload) {
         if (cannotIdentifyTeams(payload) || findPendingMatch(payload) == null) {
-            sendEvent(new Event<>(EventType.MATCH_FINISHED, null));
+            sendEvent(new Event<>(EventType.MATCH_FINISHED, null), true);
             return;
         }
 
@@ -98,12 +98,12 @@ public final class MatchService extends CachedTeamsService {
         }
 
         // Envoyer un événement signalant que le match est terminé
-        sendEvent(new Event<>(EventType.MATCH_FINISHED, match));
+        sendEvent(new Event<>(EventType.MATCH_FINISHED, match), true);
     }
 
     private void cancelMatch(Match payload) {
         if (cannotIdentifyTeams(payload) || findPendingMatch(payload) == null) {
-            sendEvent(new Event<>(EventType.MATCH_CANCELED, null));
+            sendEvent(new Event<>(EventType.MATCH_CANCELED, null), true);
             return;
         }
 
@@ -111,7 +111,7 @@ public final class MatchService extends CachedTeamsService {
         synchronized (matches) {
             Objects.requireNonNull(match).setStatus(MatchStatus.CANCELLED);
         }
-        sendEvent(new Event<>(EventType.MATCH_CANCELED, match));
+        sendEvent(new Event<>(EventType.MATCH_CANCELED, match), true);
     }
 
     private boolean cannotIdentifyTeams(Match match) {

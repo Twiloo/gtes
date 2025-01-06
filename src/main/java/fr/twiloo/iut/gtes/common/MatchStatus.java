@@ -1,7 +1,7 @@
 package fr.twiloo.iut.gtes.common;
 
 public enum MatchStatus {
-    PENDING("Plannifié"),
+    PENDING("Planifié"),
     FINISHED("Terminé"),
     CANCELLED("Annulé");
 

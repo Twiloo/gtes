@@ -1,9 +1,12 @@
 package fr.twiloo.iut.gtes;
 
 import fr.twiloo.iut.gtes.common.Config;
+import fr.twiloo.iut.gtes.common.EventType;
+import fr.twiloo.iut.gtes.common.model.Event;
 import fr.twiloo.iut.gtes.common.utils.Input;
 import fr.twiloo.iut.gtes.eventbus.EventBus;
 import fr.twiloo.iut.gtes.microservices.match.MatchService;
+import fr.twiloo.iut.gtes.microservices.notification.NotificationService;
 import fr.twiloo.iut.gtes.microservices.team.TeamService;
 import fr.twiloo.iut.gtes.mvc.MVCApp;
 
@@ -15,6 +18,7 @@ import static java.lang.System.out;
 public final class App {
     private static boolean running = true;
 
+    @SuppressWarnings("BusyWait")
     public static void main(String[] args) throws IOException {
         Input.start();
 
@@ -35,10 +39,12 @@ public final class App {
             } catch (Exception ignored) { }
             switch (option) {
                 case 1:
+                    // Lancer l'application client
                     MVCApp.getInstance();
                     return;
                 case 2:
-                    EventBus eventBus = new EventBus(Config.EVENT_BUS.port);
+                    // Lancer le bus d'évènements
+                    EventBus eventBus = new EventBus((Integer) Config.EVENT_BUS_PORT.value);
                     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                         out.println("Closing EventBus...");
                         running = false;
@@ -50,7 +56,7 @@ public final class App {
                     }));
                     return;
                 case 3:
-                    // Lancer l'application de gestion d'équipes
+                    // Lancer le service de gestion des équipes
                     TeamService teamService = new TeamService();
                     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                         out.println("Closing TeamService...");
@@ -59,7 +65,7 @@ public final class App {
                     }));
                     return;
                 case 4:
-                    // Lancer le Service Matchs
+                    // Lancer le service des matchs
                     MatchService matchService = new MatchService();
                     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                         out.println("Closing MatchService...");
@@ -68,10 +74,25 @@ public final class App {
                     }));
                     return;
                 case 5:
-                    // Lancer NotificationService
-                    out.println("Notification service (non implémenté pour le moment).");
-                    break;
+                    // Lancer le service des notifications
+                    NotificationService notificationService = new NotificationService();
+                    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                        out.println("Closing NotificationService...");
+                        running = false;
+                        notificationService.close();
+                    }));
+                    while (running) {
+                        try {
+                            Thread.sleep(30000); // Toutes les 30 secondes, vérifier la connexion au bus
+                            notificationService.sendEvent(new Event<>(EventType.CONNECTION_TEST, null), false);
+                        } catch (RuntimeException | InterruptedException ignored) {
+                            out.println("Le bus n'est plus accessible");
+                            System.exit(1);
+                        }
+                    }
+                    return;
                 case 6:
+                    // Arrêter l'application
                     out.println("Exiting...");
                     running = false;
                     Input.stop();
