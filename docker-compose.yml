@@ -1,0 +1,61 @@
+services:
+  eventbus:
+    build: .
+    command: --role=bus
+    networks:
+      - eventbus-teamservice
+      - eventbus-matchservice
+      - eventbus-notificationservice
+      - eventbus-client
+
+  teamservice:
+    build: .
+    command: --role=team
+    depends_on:
+      - eventbus
+    environment:
+      - EVENT_BUS_IP=eventbus
+    networks:
+      - eventbus-teamservice
+
+  matchservice:
+    build: .
+    command: --role=match
+    depends_on:
+      - eventbus
+    environment:
+      - EVENT_BUS_IP=eventbus
+    networks:
+      - eventbus-matchservice
+
+  notificationservice:
+    build: .
+    command: --role=notif
+    depends_on:
+      - eventbus
+    environment:
+      - EVENT_BUS_IP=eventbus
+    networks:
+      - eventbus-notificationservice
+
+  client:
+    build: .
+    command: --role=mvc
+    stdin_open: true
+    tty: true
+    depends_on:
+      - eventbus
+    environment:
+      - EVENT_BUS_IP=eventbus
+    networks:
+      - eventbus-client
+
+networks:
+  eventbus-teamservice:
+    driver: bridge
+  eventbus-matchservice:
+    driver: bridge
+  eventbus-notificationservice:
+    driver: bridge
+  eventbus-client:
+    driver: bridge

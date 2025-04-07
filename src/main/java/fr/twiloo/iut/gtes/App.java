@@ -18,10 +18,113 @@ import static java.lang.System.out;
 public final class App {
     private static boolean running = true;
 
-    @SuppressWarnings("BusyWait")
     public static void main(String[] args) throws IOException {
-        Input.start();
+        String role = getRoleArg(args);
+        if (role != null) {
+            launchByRole(role.toLowerCase());
+        } else {
+            Input.start();
+            interactiveMenu();
+        }
+        shutdownGracefully();
+    }
 
+    private static void shutdownGracefully() {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        System.exit(0);
+    }
+
+    private static String getRoleArg(String[] args) {
+        for (String arg : args) {
+            if (arg.startsWith("--role=")) {
+                return arg.substring("--role=".length());
+            }
+        }
+        return null;
+    }
+
+    private static void launchByRole(String role) throws IOException {
+        switch (role) {
+            case "mvc" -> launchMVC();
+            case "bus" -> startEventBus();
+            case "team" -> startTeamService();
+            case "match" -> startMatchService();
+            case "notif" -> startNotificationService();
+            default -> {
+                out.println("Rôle inconnu : " + role);
+                interactiveMenu();
+            }
+        }
+    }
+
+    private static void launchMVC() throws IOException {
+        Input.start();
+        MVCApp.getInstance();
+        letItRun();
+    }
+
+    private static void startNotificationService() throws IOException {
+        NotificationService notificationService = new NotificationService();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            out.println("Closing NotificationService...");
+            running = false;
+            notificationService.close();
+        }));
+        notificationTimeoutDetection(notificationService);
+        letItRun();
+    }
+
+    private static void startMatchService() throws IOException {
+        MatchService matchService = new MatchService();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            out.println("Closing MatchService...");
+            running = false;
+            matchService.close();
+        }));
+        letItRun();
+    }
+
+    private static void notificationTimeoutDetection(NotificationService notificationService) {
+        while (running) {
+            try {
+                Thread.sleep(30000); // Toutes les 30 secondes, vérifier la connexion au bus
+                notificationService.sendEvent(new Event<>(EventType.CONNECTION_TEST, null), false);
+            } catch (RuntimeException | InterruptedException ignored) {
+                out.println("Le bus n'est plus accessible");
+                System.exit(1);
+            }
+        }
+    }
+
+    private static void startEventBus() throws IOException {
+        EventBus eventBus = new EventBus((Integer) Config.EVENT_BUS_PORT.value);
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            out.println("Closing EventBus...");
+            running = false;
+            try {
+                eventBus.stop();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }));
+        letItRun();
+    }
+
+    private static void startTeamService() throws IOException {
+        TeamService teamService = new TeamService();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            out.println("Closing TeamService...");
+            running = false;
+            teamService.close();
+        }));
+        letItRun();
+    }
+
+    private static void interactiveMenu() throws IOException {
         while (running) {
             out.println("""
                     Quelle application/service démarrer ?
@@ -38,75 +141,29 @@ public final class App {
                 option = Integer.parseInt(next());
             } catch (Exception ignored) { }
             switch (option) {
-                case 1:
-                    // Lancer l'application client
-                    MVCApp.getInstance();
-                    return;
-                case 2:
-                    // Lancer le bus d'évènements
-                    EventBus eventBus = new EventBus((Integer) Config.EVENT_BUS_PORT.value);
-                    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                        out.println("Closing EventBus...");
-                        running = false;
-                        try {
-                            eventBus.stop();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }));
-                    return;
-                case 3:
-                    // Lancer le service de gestion des équipes
-                    TeamService teamService = new TeamService();
-                    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                        out.println("Closing TeamService...");
-                        running = false;
-                        teamService.close();
-                    }));
-                    return;
-                case 4:
-                    // Lancer le service des matchs
-                    MatchService matchService = new MatchService();
-                    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                        out.println("Closing MatchService...");
-                        running = false;
-                        matchService.close();
-                    }));
-                    return;
-                case 5:
-                    // Lancer le service des notifications
-                    NotificationService notificationService = new NotificationService();
-                    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                        out.println("Closing NotificationService...");
-                        running = false;
-                        notificationService.close();
-                    }));
-                    while (running) {
-                        try {
-                            Thread.sleep(30000); // Toutes les 30 secondes, vérifier la connexion au bus
-                            notificationService.sendEvent(new Event<>(EventType.CONNECTION_TEST, null), false);
-                        } catch (RuntimeException | InterruptedException ignored) {
-                            out.println("Le bus n'est plus accessible");
-                            System.exit(1);
-                        }
-                    }
-                    return;
-                case 6:
-                    // Arrêter l'application
+                case 1 -> launchMVC();
+                case 2 -> startEventBus();
+                case 3 -> startTeamService();
+                case 4 -> startMatchService();
+                case 5 -> startNotificationService();
+                case 6 -> {
                     out.println("Exiting...");
                     running = false;
                     Input.stop();
-                    break;
-                default:
-                    out.println("Option invalide. Essayez de nouveau.");
+                }
+                default -> out.println("Option invalide. Essayez de nouveau.");
             }
         }
+    }
 
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+    private static void letItRun() {
+        while (running) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
         }
-        System.exit(0);
     }
 }

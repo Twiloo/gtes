@@ -2,7 +2,21 @@
 
 ## Cadre du projet
 
-Le projet GTES a été réalisé en groupes de deux dans le cadre de la licence professionnelle DEVOPS à l'IUT Lyon 1.
+Le projet GTES a été réalisé en groupes de deux (Andréa et Mathis) dans le cadre de la licence professionnelle DEVOPS à l'IUT Lyon 1. J'ai (Mathis) adapté ce projet afin de le faire fonctionner sous Docker.
+
+## Lancement
+
+Une fois placé dans le répertoire racine du projet, exécuter ces deux commandes :
+
+- Pour construire l'ensemble des images puis containers, créer les networks associés et démarrer l'ensemble des services :
+  ```shell
+  docker compose up -d
+  ```
+- Pour interagir avec le client mvc :
+  ```shell
+  docker attach gtes-client-1
+  ```
+Une fois dans le client MVC en terminal interactif, appuyez sur Entrée pour afficher le menu des options et utiliser l'application. Vous pouvez également suivre les communications de l'application sur l'eventbus et les différents microservices en vous attanchant à ceux-ci dans d'autres fenêtres de terminal.
 
 ## Utilisation
 
